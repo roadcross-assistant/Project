@@ -17,10 +17,13 @@ import sys
 def detection_of_vehicles_from_video(folder1,folder2,findex):
 
     '''
+    Detects and saves the arrays containing bounding boxes of detected
+    vehicles from videos of a given folder
+
     Parameters:
-    folder1 -> path of the folder containing videos
-    folder2 -> path of the folder in which arrays are required to be stored
-    findex -> index number of the first video in folder1 
+    folder1 : path of the folder containing videos
+    folder2 : path of the folder in which arrays are required to be stored
+    findex : index number of the first video in folder1 
     '''
 
     #modifying forFrame function of ImageAI to make a list 
