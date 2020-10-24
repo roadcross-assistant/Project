@@ -45,8 +45,8 @@ def detection_of_vehicles_from_video(folder1,folder2,findex):
     #set and load YOLOv3 Model for detection of vehicles
     execution_path = os.getcwd()
     detector = VideoObjectDetection()
-    detector.setModelTypeAsYOLOv3()
-    detector.setModelPath(os.path.join(execution_path,"/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/yolo.h5"))
+    detector.setModelTypeAsRetinaNet()
+    detector.setModelPath(os.path.join(execution_path,"/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/resnet50_coco_best_v2.0.1.h5"))
     detector.loadModel()
     custom_objects = detector.CustomObjects(bicycle=True, motorcycle=True,car=True,truck=True)
 
@@ -60,7 +60,7 @@ def detection_of_vehicles_from_video(folder1,folder2,findex):
             input_file_path=os.path.join(execution_path, video),
             frames_per_second=30,
             per_frame_function=forFrame,
-            minimum_percentage_probability=70)
+            minimum_percentage_probability=40)
         B = np.array(B)
         print('saving array for video' + video + '\n shape of array: ' + str(B.shape))
         np.save(folder2+'/array'+str(findex),B)
@@ -68,11 +68,11 @@ def detection_of_vehicles_from_video(folder1,folder2,findex):
 
 
 detection_of_vehicles_from_video('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_train',
-'/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_train',1)
+'/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_train_v2',1)
 
 print('saved arrays for videos_train')
 
 detection_of_vehicles_from_video('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_test',
-'/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_test',61)
+'/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_test_v2',61)
 
 print('saved arrays for videos_test')
