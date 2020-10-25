@@ -42,7 +42,7 @@ def detection_of_vehicles_from_video(folder1,folder2,findex):
     videos = glob.glob(folder1+'/video*.MOV')
     videos = natsort.natsorted(videos)
 
-    #set and load YOLOv3 Model for detection of vehicles
+    #set and load ResNet Model for detection of vehicles
     execution_path = os.getcwd()
     detector = VideoObjectDetection()
     detector.setModelTypeAsRetinaNet()
