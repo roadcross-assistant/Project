@@ -13,7 +13,7 @@ from imageai.Detection import VideoObjectDetection
 import os
 import sys
 from random import randint
-from math import ceil, sqrt
+from math import ceil, nan, sqrt
 import natsort
 import pandas as pd
 import random
@@ -145,6 +145,8 @@ def get_direction(videoPath, trackerType, boxes_list, frame_no):
             #applying vehicle tracking in backward direction
                 
             count = 1
+            success_back = None
+            boxes_back = []
             while count <= no_of_prev_frames:
                 (success_back, boxes_back) = multiTracker_back.update(frame_buffer[k])    
                 count = count + 1
