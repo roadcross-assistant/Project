@@ -1,5 +1,6 @@
 {
     "files.associations": {
         "numeric": "cpp"
-    }
+    },
+    "python.pythonPath": "/home/siddhi/anaconda3/envs/roadcross/bin/python"
 }
