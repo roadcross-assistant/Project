@@ -45,8 +45,10 @@ def detection_of_vehicles_from_video(folder1,folder2,findex):
     #set and load ResNet Model for detection of vehicles
     execution_path = os.getcwd()
     detector = VideoObjectDetection()
-    detector.setModelTypeAsRetinaNet()
+    detector.setModelTypeAsRetinaNet() 
+    #use detector.setModelTypeAsYOLOv3() to use YOLOv3 instead of RetinaNet
     detector.setModelPath(os.path.join(execution_path,"/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/resnet50_coco_best_v2.0.1.h5"))
+    #use model path of yolo.h5 if to use YOLOv3 instead of RetinaNet
     detector.loadModel()
     custom_objects = detector.CustomObjects(bicycle=True, motorcycle=True,car=True,truck=True)
 
@@ -68,11 +70,11 @@ def detection_of_vehicles_from_video(folder1,folder2,findex):
 
 
 detection_of_vehicles_from_video('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_train',
-'/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_train',1)
+'/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_train_v2',1)
 
 print('saved arrays for videos_train')
 
 detection_of_vehicles_from_video('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_test',
-'/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_test',61)
+'/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_test_v2',61)
 
 print('saved arrays for videos_test')

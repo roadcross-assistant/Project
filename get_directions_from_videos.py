@@ -9,8 +9,6 @@ import sys
 import numpy as np
 import cv2
 import glob
-from matplotlib import pyplot as plt
-%matplotlib inline  
 from imageai.Detection import VideoObjectDetection
 import os
 import sys
@@ -131,7 +129,7 @@ def get_direction(videoPath, trackerType, boxes_list, frame_no):
                 x1[i] = (box[0]+2*box[2])/2
                 multiTracker_back.add(createTrackerByName(trackerType), frame, box)
             
-            #all the vehicles from boxes_list added in the traker instance
+            #all the vehicles from boxes_list added in the tracker instance
             #applying vehicle tracking in backward direction
                 
             (success_back, boxes_back) = multiTracker_back.update(frame_b1)
@@ -190,7 +188,7 @@ def get_directions_from_videos(videos_folder, arrays_folder, target_folder, find
     videos = natsort.natsorted(videos)
 
     for (fname, vname) in zip(arrays, videos):
-        D = [[],[],[],[],[]]
+        D = [[],[],[],[],[]] #since we won't be able to have past 5 frames for the first 5 frames
         print("processing ",vname,":")
         bounding_boxes = np.load(fname, allow_pickle=True) #loading the numpy array containing all detected vehicles
         no_frames = bounding_boxes.shape[0]
@@ -210,12 +208,12 @@ def get_directions_from_videos(videos_folder, arrays_folder, target_folder, find
 
 #%%
 get_directions_from_videos('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_train', 
-                            '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_train',
-                            '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/directions_train', 1)
+                            '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_train_v2',
+                            '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/directions_train_v2', 1)
 
 get_directions_from_videos('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_test', 
-                            '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_test',
-                            '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/directions_test', 61)
+                            '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_test_v2',
+                            '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/directions_test_v2', 61)
 
 
 
