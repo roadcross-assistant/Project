@@ -110,6 +110,7 @@ def get_direction(videoPath, trackerType, boxes_list, frame_no):
         #     frame_b7 = frame
         # if ( k == frame_no - 6):
         #     frame_b6 = frame
+        frame_b1 = frame_b2 = frame_b3 = frame_b4 = frame_b5 = -1
         if ( k == frame_no - 5):
             frame_b5 = frame
         if ( k == frame_no - 4):
