@@ -110,17 +110,28 @@ def get_direction(videoPath, trackerType, boxes_list, frame_no):
         #     frame_b7 = frame
         # if ( k == frame_no - 6):
         #     frame_b6 = frame
+
+
         frame_b1 = frame_b2 = frame_b3 = frame_b4 = frame_b5 = -1
-        if ( k == frame_no - 5):
-            frame_b5 = frame
-        if ( k == frame_no - 4):
-            frame_b4 = frame
-        if ( k == frame_no - 3):
-            frame_b3 = frame
-        if ( k == frame_no - 2):
-            frame_b2 = frame
-        if ( k == frame_no - 1):
-            frame_b1 = frame
+        no_of_prev_frames = 5  # previous frames number
+        count = no_of_prev_frames
+        frame_buffer = []
+
+        while count > 0:
+            if k == frame_no - count:
+                frame_buffer[count] = frame
+            count = count - 1
+
+        # if ( k == frame_no - 5):
+        #     frame_b5 = frame
+        # if ( k == frame_no - 4):
+        #     frame_b4 = frame
+        # if ( k == frame_no - 3):
+        #     frame_b3 = frame
+        # if ( k == frame_no - 2):
+        #     frame_b2 = frame
+        # if ( k == frame_no - 1):
+        #     frame_b1 = frame
 
 
         if k == frame_no:
@@ -133,11 +144,15 @@ def get_direction(videoPath, trackerType, boxes_list, frame_no):
             #all the vehicles from boxes_list added in the tracker instance
             #applying vehicle tracking in backward direction
                 
-            (success_back, boxes_back) = multiTracker_back.update(frame_b1)
-            (success_back, boxes_back) = multiTracker_back.update(frame_b2)
-            (success_back, boxes_back) = multiTracker_back.update(frame_b3)
-            (success_back, boxes_back) = multiTracker_back.update(frame_b4)
-            (success_back, boxes_back) = multiTracker_back.update(frame_b5)
+            count = 1
+            while count <= no_of_prev_frames:
+                (success_back, boxes_back) = multiTracker_back.update(frame_buffer[k])    
+                count = count + 1
+            # (success_back, boxes_back) = multiTracker_back.update(frame_b1)
+            # (success_back, boxes_back) = multiTracker_back.update(frame_b2)
+            # (success_back, boxes_back) = multiTracker_back.update(frame_b3)
+            # (success_back, boxes_back) = multiTracker_back.update(frame_b4)
+            # (success_back, boxes_back) = multiTracker_back.update(frame_b5)
             #(success_back, boxes_back) = multiTracker_back.update(frame_b6)
             #(success_back, boxes_back) = multiTracker_back.update(frame_b7)
             #(success_back, boxes_back) = multiTracker_back.update(frame_b8)
@@ -215,7 +230,3 @@ get_directions_from_videos('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Projec
 get_directions_from_videos('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_test', 
                             '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_test_v2',
                             '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/directions_test_v2', 61)
-
-
-
-# %%
