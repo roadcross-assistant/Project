@@ -32,11 +32,11 @@ Our dataset contains 76 videos from diverse locations, time, traffic patterns, c
 
 ## 🔨 Implementation
 
-### [**Approach 1.1** ![Approach 1.1](https://img.icons8.com/fluent-systems-filled/18/000000/external-link.png)](https://github.com/roadcross-assistant/Project/blob/master/Approach_1.1_individual_frames.ipynb)
+### [**Approach 1.1** ![Approach 1.1](https://img.icons8.com/fluent-systems-filled/18/000000/external-link.png)](https://nbviewer.jupyter.org/github/roadcross-assistant/Project/blob/master/Approach_1.1_individual_frames.ipynb)
 
 It is our simplest approach where we extracted features from individual frames of the video and trained classification model to predict if a particular frame is safe/unsafe for crossing road.
 
-### [**Approach 1.2** ![Approach 1.2](https://img.icons8.com/fluent-systems-filled/18/000000/external-link.png)](https://github.com/roadcross-assistant/Project/blob/master/Approach_1.2_individual_frames.ipynb)
+### [**Approach 1.2** ![Approach 1.2](https://img.icons8.com/fluent-systems-filled/18/000000/external-link.png)](https://nbviewer.jupyter.org/github/roadcross-assistant/Project/blob/master/Approach_1.2_individual_frames.ipynb)
 
 It is an advancement over Approach 1.1 where we have made an attempt to improve our feature extraction logic.
 
