@@ -48,7 +48,7 @@ It is our simplest approach where we extracted features from individual frames o
 
 It is an advancement over Approach 1.1 where we have made an attempt to improve our feature extraction logic.
 
-*To know more about feature extraction, model training and implementation details, visit our [website](https://rodcross-assistant.github.io/Website/). *
+*To know more about feature extraction, model training and implementation details, visit our [website](https://rodcross-assistant.github.io/Website/).*
 
 
 ## ⚡ Developed and Contributed by
