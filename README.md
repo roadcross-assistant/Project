@@ -2,7 +2,7 @@
 
 ![main-img](images/roadcross-img.jpg)
 
-<p style="text-align:center; font-size: 0.8rem;"> Image &copy;  www.dreamstime.com </p>
+<!-- <p style="text-align:center; font-size: 0.8rem;"> Image &copy;  www.dreamstime.com </p> -->
 
 ## 🕶 Introduction
 
