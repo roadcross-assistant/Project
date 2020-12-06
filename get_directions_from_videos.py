@@ -100,39 +100,26 @@ def get_direction(videoPath, trackerType, boxes_list, frame_no):
         
         #saving past few frames as we will apply traking in backward direction
         #form the frame_no
-        # if( k == frame_no -10 ):
-        #     frame_b10 = frame
-        # if ( k == frame_no - 9):
-        #     frame_b9 = frame
-        # if ( k == frame_no - 8):
-        #     frame_b8 = frame
-        # if ( k == frame_no - 7):
-        #     frame_b7 = frame
-        # if ( k == frame_no - 6):
-        #     frame_b6 = frame
-
-
-        frame_b1 = frame_b2 = frame_b3 = frame_b4 = frame_b5 = -1
-        no_of_prev_frames = 5  # previous frames number
-        count = no_of_prev_frames
-        frame_buffer = []
-
-        while count > 0:
-            if k == frame_no - count:
-                frame_buffer[count] = frame
-            count = count - 1
-
-        # if ( k == frame_no - 5):
-        #     frame_b5 = frame
-        # if ( k == frame_no - 4):
-        #     frame_b4 = frame
-        # if ( k == frame_no - 3):
-        #     frame_b3 = frame
-        # if ( k == frame_no - 2):
-        #     frame_b2 = frame
-        # if ( k == frame_no - 1):
-        #     frame_b1 = frame
-
+        if( k == frame_no -10 ):
+            frame_b10 = frame
+        if ( k == frame_no - 9):
+            frame_b9 = frame
+        if ( k == frame_no - 8):
+            frame_b8 = frame
+        if ( k == frame_no - 7):
+            frame_b7 = frame
+        if ( k == frame_no - 6):
+            frame_b6 = frame
+        if ( k == frame_no - 5):
+            frame_b5 = frame
+        if ( k == frame_no - 4):
+            frame_b4 = frame
+        if ( k == frame_no - 3):
+            frame_b3 = frame
+        if ( k == frame_no - 2):
+            frame_b2 = frame
+        if ( k == frame_no - 1):
+            frame_b1 = frame
 
         if k == frame_no:
             #boxes_list = [tuple(l) for l in boxes_list]
@@ -141,25 +128,20 @@ def get_direction(videoPath, trackerType, boxes_list, frame_no):
                 x1[i] = (box[0]+2*box[2])/2
                 multiTracker_back.add(createTrackerByName(trackerType), frame, box)
             
-            #all the vehicles from boxes_list added in the tracker instance
+            #all the vehicles from boxes_list added in the traker instance
             #applying vehicle tracking in backward direction
                 
-            count = 1
-            success_back = None
-            boxes_back = []
-            while count <= no_of_prev_frames:
-                (success_back, boxes_back) = multiTracker_back.update(frame_buffer[k])    
-                count = count + 1
-            # (success_back, boxes_back) = multiTracker_back.update(frame_b1)
-            # (success_back, boxes_back) = multiTracker_back.update(frame_b2)
-            # (success_back, boxes_back) = multiTracker_back.update(frame_b3)
-            # (success_back, boxes_back) = multiTracker_back.update(frame_b4)
-            # (success_back, boxes_back) = multiTracker_back.update(frame_b5)
+            (success_back, boxes_back) = multiTracker_back.update(frame_b1)
+            (success_back, boxes_back) = multiTracker_back.update(frame_b2)
+            (success_back, boxes_back) = multiTracker_back.update(frame_b3)
+            (success_back, boxes_back) = multiTracker_back.update(frame_b4)
+            (success_back, boxes_back) = multiTracker_back.update(frame_b5)
             #(success_back, boxes_back) = multiTracker_back.update(frame_b6)
             #(success_back, boxes_back) = multiTracker_back.update(frame_b7)
             #(success_back, boxes_back) = multiTracker_back.update(frame_b8)
             #(success_back, boxes_back) = multiTracker_back.update(frame_b9)
             #(success_back, boxes_back) = multiTracker_back.update(frame_b10)
+
 
 
             for i in range(n):
@@ -225,10 +207,23 @@ def get_directions_from_videos(videos_folder, arrays_folder, target_folder, find
         findex = findex + 1
 
 #%%
-get_directions_from_videos('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_train', 
-                            '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_train_v2',
-                            '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/directions_train_v2', 1)
+# get_directions_from_videos('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_train', 
+#                             '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_train_v2',
+#                             '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/directions_train_v2', 1)
 
-get_directions_from_videos('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_test', 
-                            '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_test_v2',
-                            '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/directions_test_v2', 61)
+# get_directions_from_videos('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_test', 
+#                             '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_test_v2',
+#                             '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/directions_test_v2', 61)
+
+get_directions_from_videos('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_new', 
+                             '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_new_v2',
+                             '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/directions_new_v2', 77)
+
+
+# %%
+arrays_folder = '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_new_v2'
+arrays = glob.glob(arrays_folder+'/array*.npy')
+arrays = natsort.natsorted(arrays)[-6:]
+print(arrays)
+
+# %%
