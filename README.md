@@ -40,7 +40,7 @@ It is our simplest approach where we extracted features from individual frames o
 
 It is an advancement over Approach 1.1 where we have made an attempt to improve our feature extraction logic.
 
-*To know more about feature extraction, model training and implementation details, visit our [website ![website-link](https://img.icons8.com/fluent-systems-filled/15/0000EE /external-link.png)](https://roadcross-assistant.github.io/Website/ "Road Crossing Assistant Website").*
+*To know more about feature extraction, model training and implementation details, visit our [website ![website-link](https://img.icons8.com/fluent-systems-filled/15/0000EE/external-link.png)](https://roadcross-assistant.github.io/Website/ "Road Crossing Assistant Website").*
 
 &nbsp;
 
