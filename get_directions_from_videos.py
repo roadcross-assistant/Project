@@ -219,11 +219,3 @@ get_directions_from_videos('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Projec
                              '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_new_v2',
                              '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/directions_new_v2', 77)
 
-
-# %%
-arrays_folder = '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_new_v2'
-arrays = glob.glob(arrays_folder+'/array*.npy')
-arrays = natsort.natsorted(arrays)[-6:]
-print(arrays)
-
-# %%
