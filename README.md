@@ -16,7 +16,7 @@ This repository includes Python implementation for various approaches we develop
 
 Our dataset contains 76 videos from diverse locations, time, traffic patterns, collected using an action camera from different roads of Anand, Gujarat.
 
-[More about Dataset Usage and Download Link ![Dataset-link](https://img.icons8.com/fluent-systems-filled/15/000000/external-link.png)](https://docs.google.com/document/d/1uwIMWzDnLLMtVm9TRDQFjIF5yI1wMAf-Fw3d0x39Yvo/edit?usp=sharing)
+[More about Dataset Usage and Download Link ![Dataset-link](https://img.icons8.com/fluent-systems-filled/15/0366D6/external-link.png)](https://docs.google.com/document/d/1uwIMWzDnLLMtVm9TRDQFjIF5yI1wMAf-Fw3d0x39Yvo/edit?usp=sharing)
 
 &nbsp;
 
@@ -30,21 +30,21 @@ Our dataset contains 76 videos from diverse locations, time, traffic patterns, c
 
 ## 🔨 **Implementation**
 
-### [**Approach 1.1** ![Approach 1.1](https://img.icons8.com/fluent-systems-filled/18/000000/external-link.png)](https://nbviewer.jupyter.org/github/roadcross-assistant/Project/blob/master/Approach_1.1_individual_frames.ipynb)
+### [**Approach 1.1** ![Approach 1.1](https://img.icons8.com/fluent-systems-filled/18/0366D6/external-link.png)](https://nbviewer.jupyter.org/github/roadcross-assistant/Project/blob/master/Approach_1.1_individual_frames.ipynb)
 
 It is our simplest approach where we extracted features from individual frames of the video and trained classification model to predict if a particular frame is safe/unsafe for crossing road.
 
-### [**Approach 1.2** ![Approach 1.2](https://img.icons8.com/fluent-systems-filled/18/000000/external-link.png)](https://nbviewer.jupyter.org/github/roadcross-assistant/Project/blob/master/Approach_1.2_individual_frames.ipynb)
+### [**Approach 1.2** ![Approach 1.2](https://img.icons8.com/fluent-systems-filled/18/0366D6/external-link.png)](https://nbviewer.jupyter.org/github/roadcross-assistant/Project/blob/master/Approach_1.2_individual_frames.ipynb)
 
 It is an advancement over Approach 1.1 where we have made an attempt to improve our feature extraction logic using direction detection.
 
-### [**Approach 1.3** ![Approach 1.3](https://img.icons8.com/fluent-systems-filled/18/000000/external-link.png)](https://nbviewer.jupyter.org/github/roadcross-assistant/Project/blob/master/Approach_1.3_individual_frames.ipynb)
+### [**Approach 1.3** ![Approach 1.3](https://img.icons8.com/fluent-systems-filled/18/0366D6/external-link.png)](https://nbviewer.jupyter.org/github/roadcross-assistant/Project/blob/master/Approach_1.3_individual_frames.ipynb)
 
 It is an advancement over Approach 1.2 where we have made an attempt to improve our features by adding relative speed of vehicles as features and manually labelling the videos frame-wise instead of second-wise in above 2 approaches.
 
 &nbsp;
 
-*To know more about feature extraction, model training and implementation details, visit our [website ![website-link](https://img.icons8.com/fluent-systems-filled/15/000000/external-link.png)](https://roadcross-assistant.github.io/Website/ "Road Crossing Assistant Website").*
+*To know more about feature extraction, model training and implementation details, visit our [website ![website-link](https://img.icons8.com/fluent-systems-filled/15/0366D6/external-link.png)](https://roadcross-assistant.github.io/Website/ "Road Crossing Assistant Website").*
 
 &nbsp;
 
