@@ -1,3 +1,4 @@
+#%%
 #Python script to generate arrays containing detected vehicles of each frame from a video so that we
 #do not need to process videos everytime.
 
@@ -68,13 +69,20 @@ def detection_of_vehicles_from_video(folder1,folder2,findex):
         np.save(folder2+'/array'+str(findex),B)
         findex = findex + 1
 
+#%%
+# detection_of_vehicles_from_video('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_train',
+# '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_train_v2',1)
 
-detection_of_vehicles_from_video('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_train',
-'/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_train_v2',1)
+# print('saved arrays for videos_train')
 
-print('saved arrays for videos_train')
+# detection_of_vehicles_from_video('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_test',
+# '/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_test_v2',61)
 
-detection_of_vehicles_from_video('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_test',
-'/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_test_v2',61)
+# print('saved arrays for videos_test')
 
-print('saved arrays for videos_test')
+detection_of_vehicles_from_video('/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/videos_new',
+'/home/siddhi/Desktop/RoadCrossingAssistant_FY_Project_Data/arrays_new_v2',77)
+
+print('saved arrays for videos_new')
+
+# %%
