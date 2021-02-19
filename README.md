@@ -16,7 +16,7 @@ This repository includes Python implementation for various approaches we develop
 
 Our dataset contains 76 videos from diverse locations, time, traffic patterns, collected using an action camera from different roads of Anand, Gujarat.
 
-[More about Dataset Usage and Download Link ![Dataset-link](https://img.icons8.com/fluent-systems-filled/15/0366D6/external-link.png)](https://docs.google.com/document/d/1uwIMWzDnLLMtVm9TRDQFjIF5yI1wMAf-Fw3d0x39Yvo/edit?usp=sharing)
+[Dataset Usage and Download Link ![Dataset-link](https://img.icons8.com/fluent-systems-filled/15/0366D6/external-link.png)](https://forms.gle/xtkZexnEuRVYfwAT6)
 
 &nbsp;
 
