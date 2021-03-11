@@ -2,5 +2,6 @@
     "files.associations": {
         "numeric": "cpp"
     },
-    "python.pythonPath": "C:\\Anaconda\\envs\\roadcross\\python.exe"
+    "python.pythonPath": "/data/anaconda3/envs/roadcross/bin/python",
+    "jupyter.jupyterServerType": "local"
 }
