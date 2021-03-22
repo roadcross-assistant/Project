@@ -4,7 +4,7 @@ import os
 import pickle
 import numpy as np
 
-user = 'siddhi'
+user = 'aws'
 
 if user == 'siddhi':
     path_videos = 'C:/RoadCrossingAssistant/Data/Videos/'
@@ -17,6 +17,11 @@ elif user == 'yagnesh':
     path_labels_csv = '/home/yagnesh/Study/Machine Learning/ML projects/RoadCrossingAssistant_Arrays/labels_framewise.csv'
     path_labels_list = '/home/yagnesh/Study/Machine Learning/ML projects/RoadCrossingAssistant_Arrays/labels_framewise.pkl'
 
+elif user == 'aws':
+    path_videos = '/home/ubuntu/Data/Videos/'
+    path_labels_csv = '/home/ubuntu/Data/labels_framewise_csv.csv'
+    path_labels_list = '/home/ubuntu/Data/labels_framewise_list.pkl'
+    path_frames = '/home/ubuntu/Data/Frames/'
 #%%
 
 video_ids = list(range(1,105))
