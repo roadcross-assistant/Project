@@ -8,7 +8,7 @@ import cv2
 
 class DataGenerator(tf.keras.utils.Sequence):
     'Generates data for Keras'
-    def __init__(self, list_IDs, folder_path, history=0, no_videos = 8, batch_size=32, dim=(360,640),
+    def __init__(self, list_IDs, folder_path, history=0, no_videos = 8, batch_size=16, dim=(360,640),
      n_channels=3, n_classes=2, shuffle=True):
         'Initialization'
 
@@ -70,6 +70,7 @@ class DataGenerator(tf.keras.utils.Sequence):
                 X[ctr, ] = np.asarray(frame_resized)
                 y[ctr] = labels_temp[fid]
                 ctr = ctr + 1
+                im.close()
 
         #print(y)
-        return X, tf.keras.utils.to_categorical(y, num_classes=self.n_classes)
+        return X, y

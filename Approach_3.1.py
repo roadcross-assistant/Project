@@ -7,7 +7,6 @@ import numpy as np
 import cv2
 import glob
 from matplotlib import pyplot as plt
-#from imageai.Detection import VideoObjectDetection
 import os
 import sys
 from random import randint
@@ -15,10 +14,12 @@ from math import ceil, sqrt
 import natsort
 import pandas as pd
 import random
-from keras.applications.vgg16 import VGG16
 import pickle
 from DataLoader import  DataGenerator
-
+import tensorflow as tf
+#from tensorflow.keras.applications.vgg16 import VGG16
+#from tensorflow.keras.applications.inception_v3 import InceptionV3
+from tensorflow.keras.applications import MobileNet
 
 # %%
 user = 'aws'
@@ -40,12 +41,10 @@ elif user == 'aws':
     path_labels_list = '/home/ubuntu/Data/labels_framewise_list.pkl'
     path_frames = '/home/ubuntu/Data/Frames/'
 
-
 # frame-wise labels array
 open_file = open(path_labels_list, "rb")
 labels_list = pickle.load(open_file)
 open_file.close()
-
 
 # %%
 #Perform train-test-validation split(62-24-18)
@@ -71,7 +70,6 @@ videos_train = x[18+24: ]
 print(videos_train, len(videos_train))
 print(videos_test, len(videos_test))
 print(videos_validation, len(videos_validation))
-
 
 # %%
 list_IDs_train = {}
@@ -117,88 +115,41 @@ print(len(list_IDs_test))
 print(list_IDs_validation)
 print(len(list_IDs_validation))
 
-
 # %%
 # Generators
 training_generator = DataGenerator(list_IDs = list_IDs_train, folder_path = path_frames)
 validation_generator = DataGenerator(list_IDs = list_IDs_validation, folder_path = path_frames)
 testing_generator = DataGenerator(list_IDs = list_IDs_test, folder_path = path_frames)
 
-
 # %%
-from tensorflow.keras.layers import Flatten, Dense
-import keras
-import tensorflow
-from tensorflow.keras.applications.vgg16 import VGG16
-from tensorflow.keras.applications.inception_v3 import InceptionV3
-from tensorflow.keras import layers 
-from tensorflow.keras.applications import MobileNet
+def create_model():
 
-base_model = MobileNet(input_shape = (360, 640, 3), include_top = False, weights = 'imagenet')
 
-# for layer in base_model.layers:
-#     layer.trainable = False
+    base_model = MobileNet(input_shape = (360, 640, 3), include_top = False, weights = 'imagenet')
 
-x = layers.Flatten()(base_model.output)
-x = layers.Dense(1024, activation='relu')(x)
-x = layers.Dense(512, activation='relu')(x)
-x = layers.Dense(2, activation='softmax')(x)
+    # for layer in base_model.layers:
+    #     layer.trainable = False
 
-model = tensorflow.keras.models.Model(base_model.input, x)
-model.compile(
-    loss='binary_crossentropy',
-    optimizer=tensorflow.keras.optimizers.Adam(),
-    metrics=['accuracy'])
+    x = tf.keras.layers.Flatten()(base_model.output)
+    x = tf.keras.layers.Dense(1024, activation='relu')(x)
+    x = tf.keras.layers.Dense(512, activation='relu')(x)
+    x = tf.keras.layers.Dense(1)(x)
 
+    model = tf.keras.models.Model(base_model.input, x)
+    model.compile(
+        loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+        optimizer=tf.keras.optimizers.Adam(),
+        metrics=[tf.keras.metrics.BinaryAccuracy(threshold = 0.6)])
+
+    return model
+
+model = create_model()
 model.summary()
-
 
 # %%
 #history = model.fit_generator(train_generator, shuffle='true', epochs=1, verbose=1, batch_size=16)
 
-history = model.fit_generator(generator=training_generator, validation_data=validation_generator, epochs=50, verbose=1)
-
-
-# %%
-# import random
-# from PIL import Image 
-
-# dim = (1080, 1920)
-# X = np.empty((4, *dim, 3))
-# y = np.empty((4), dtype=int)
-
-# video_ids = [2,3]
-
-# c = 0
-
-# for vid in video_ids:
-
-#     frame_ids = random.sample(list(range(list_IDs_train[vid])), 2) # generate "no_frames_per_video" random frames
-#             #max value of frame given by self.list_ids[vid]
-#     labels_temp = np.load(path_frames + "video" + str(vid) + "/labels" + str(vid) + ".npy")
-
-#     for fid in frame_ids:
-#         im = Image.open(path_frames + "video" + str(vid) + "/frame" + str(fid) + ".jpg")
-
-#         #X[c, ] = np. asarray(im)
-
-#         d = np.asarray(im)
-#         frame_resized = cv2.resize(d, (640, 360), interpolation = cv2.INTER_AREA)
-
-#         print(d.shape, frame_resized.shape)
-                
-#         y[c] = labels_temp[fid]
-
-#         c = c + 1
-
-# print(c)
-
-# print(X.shape, y.shape)
-
-# print(y)
-
-# print(keras.utils.to_categorical(y, num_classes=2))
-
+history = model.fit_generator(generator=training_generator, validation_data=validation_generator, epochs=70, verbose=1)
 
 # %%
 print("Evaluate on test data")
@@ -224,9 +175,4 @@ print("train loss, trai acc:", results)
 
 # print('Average precision-recall score: {0:0.2f}'.format(
 #       average_precision))
-
-
-# %%
-
-
 
