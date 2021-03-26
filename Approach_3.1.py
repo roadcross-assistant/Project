@@ -140,7 +140,7 @@ def create_model():
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
         optimizer=tf.keras.optimizers.Adam(),
-        metrics=[tf.keras.metrics.BinaryAccuracy(threshold = 0.6)])
+        metrics=[tf.keras.metrics.BinaryAccuracy()])
 
     return model
 
@@ -154,11 +154,11 @@ checkpoint_dir = os.path.dirname(checkpoint_path)
 
 # Create a callback that saves the model's weights
 cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-                                                 save_weights_only=True, monitor='val_accuracy', verbose=1, 
+                                                 save_weights_only=True, monitor='val_binary_accuracy', verbose=1, 
                                                  save_best_only=True, mode='max')
 
-history = model.fit_generator(generator=training_generator, validation_data=validation_generator, epochs=70, 
-                                verbose=1, callbacks = [cp_callback])
+history = model.fit_generator(generator=training_generator, validation_data=validation_generator, epochs=50, 
+                                verbose=1, callbacks = [cp_callback], class_weight = {0: 1 , 1:1.92})
 
 # %%
 print("Evaluate on test data")
