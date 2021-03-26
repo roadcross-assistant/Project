@@ -17,6 +17,7 @@ import random
 import pickle
 from DataLoader import  DataGenerator
 import tensorflow as tf
+from tensorflow.keras.callbacks import ModelCheckpoint
 #from tensorflow.keras.applications.vgg16 import VGG16
 #from tensorflow.keras.applications.inception_v3 import InceptionV3
 from tensorflow.keras.applications import MobileNet
@@ -148,8 +149,16 @@ model.summary()
 
 # %%
 #history = model.fit_generator(train_generator, shuffle='true', epochs=1, verbose=1, batch_size=16)
+checkpoint_path = "/home/ubuntu/Project/checkpoints/training_1/cp.ckpt"
+checkpoint_dir = os.path.dirname(checkpoint_path)
 
-history = model.fit_generator(generator=training_generator, validation_data=validation_generator, epochs=70, verbose=1)
+# Create a callback that saves the model's weights
+cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+                                                 save_weights_only=True, monitor='val_accuracy', verbose=1, 
+                                                 save_best_only=True, mode='max')
+
+history = model.fit_generator(generator=training_generator, validation_data=validation_generator, epochs=70, 
+                                verbose=1, callbacks = [cp_callback])
 
 # %%
 print("Evaluate on test data")
