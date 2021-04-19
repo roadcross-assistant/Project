@@ -114,18 +114,61 @@ for vid in videos_validation:
     labels_list = list(labels_array)
     labels_validation.extend(labels_list)
 
+print(len(filenames_train), len(filenames_validation), len(filenames_test))
+print(len(labels_train), len(labels_validation), len(labels_test))
+
 
 # %%
 # Generators
-training_generator = DataGenerator(list_IDs = list_IDs_train, folder_path = path_frames)
-validation_generator = DataGenerator(list_IDs = list_IDs_validation, folder_path = path_frames)
-testing_generator = DataGenerator(list_IDs = list_IDs_test, folder_path = path_frames)
+def parse_function(filename, label):
+
+    image = tf.io.read_file(filename)
+    image = tf.image.decode_jpeg(image)
+    image = tf.image.convert_image_dtype(image, tf.float32)
+    image = tf.image.resize(image, [270, 480], method=tf.image.ResizeMethod.AREA, 
+                            preserve_aspect_ratio=True)
+    
+    return image, label
+
+
+def train_preprocess(image, label):
+
+    image = tf.image.random_brightness(image, 0.15)
+
+    return image, label
+
+dataset_train = tf.data.Dataset.from_tensor_slices((filenames_train,labels_train))
+dataset_train = dataset_train.map(parse_function, num_parallel_calls=4)
+dataset_train = dataset_train.map(train_preprocess, num_parallel_calls=4)
+#d = d.window(2)
+#d = d.shuffle(3)
+#d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
+#d = d.map(lambda a,b : (a,b[-1]))
+dataset_train = dataset_train.batch(32)
+
+dataset_test = tf.data.Dataset.from_tensor_slices((filenames_train,labels_train))
+dataset_test = dataset_test.map(parse_function, num_parallel_calls=4)
+dataset_test = dataset_test.map(train_preprocess, num_parallel_calls=4)
+#d = d.window(2)
+#d = d.shuffle(3)
+#d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
+#d = d.map(lambda a,b : (a,b[-1]))
+dataset_test = dataset_test.batch(32)
+
+dataset_val = tf.data.Dataset.from_tensor_slices((filenames_train,labels_train))
+dataset_val = dataset_val.map(parse_function, num_parallel_calls=4)
+dataset_val = dataset_val.map(train_preprocess, num_parallel_calls=4)
+#d = d.window(2)
+#d = d.shuffle(3)
+#d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
+#d = d.map(lambda a,b : (a,b[-1]))
+dataset_val = dataset_val.batch(32)
 
 # %%
 def create_model():
 
 
-    base_model = MobileNet(input_shape = (360, 640, 3), include_top = False, weights = 'imagenet')
+    base_model = MobileNet(input_shape = (270, 480, 3), include_top = False, weights = 'imagenet')
 
     # for layer in base_model.layers:
     #     layer.trainable = False
@@ -156,16 +199,16 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                  save_weights_only=True, monitor='val_binary_accuracy', verbose=1, 
                                                  save_best_only=True, mode='max')
 
-history = model.fit_generator(generator=training_generator, validation_data=validation_generator, epochs=50, 
+history = model.fit(x=dataset_train, validation_data=dataset_val, epochs=50, 
                                 verbose=1, callbacks = [cp_callback], class_weight = {0: 1 , 1:1.92})
 
 # %%
 print("Evaluate on test data")
-results = model.evaluate(testing_generator)
+results = model.evaluate(dataset_test)
 print("test loss, test acc:", results)
 
 print("Evaluate on train data")
-results = model.evaluate(training_generator)
+results = model.evaluate(dataset_train)
 print("train loss, trai acc:", results)
 
 # Generate predictions (probabilities -- the output of the last layer)
