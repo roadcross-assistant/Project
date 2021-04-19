@@ -73,48 +73,47 @@ print(videos_test, len(videos_test))
 print(videos_validation, len(videos_validation))
 
 # %%
-list_IDs_train = {}
-list_IDs_test = {}
-list_IDs_validation = {}
+filenames_train = []
+labels_train = []
+filenames_validation = []
+labels_validation = []
+filenames_test = []
+labels_test = []
+
+# videos = [1,2]
+# filenames = []
+# labels = []
 
 for vid in videos_train:
-
-    video = path_videos + "video" + str(vid) + ".MOV"
-    #print("starting " + video)
-    cap = cv2.VideoCapture(video)
-    no_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    cap.release()
-    cv2.destroyAllWindows() 
-    list_IDs_train[vid] = no_frames
+    folder = path_frames + "video{}/".format(vid)
+    frames = glob.glob(folder + 'frame*.jpg')
+    frames = natsort.natsorted(frames)
+    filenames_train.extend(frames)
+    labels_path = path_frames + "video{}/".format(vid) + "labels{}.npy".format(vid)
+    labels_array = np.load(labels_path)
+    labels_list = list(labels_array)
+    labels_train.extend(labels_list)
 
 for vid in videos_test:
-
-    video = path_videos + "video" + str(vid) + ".MOV"
-    #print("starting " + video)
-    cap = cv2.VideoCapture(video)
-    no_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    cap.release()
-    cv2.destroyAllWindows() 
-    list_IDs_test[vid] = no_frames
+    folder = path_frames + "video{}/".format(vid)
+    frames = glob.glob(folder + 'frame*.jpg')
+    frames = natsort.natsorted(frames)
+    filenames_test.extend(frames)
+    labels_path = path_frames + "video{}/".format(vid) + "labels{}.npy".format(vid)
+    labels_array = np.load(labels_path)
+    labels_list = list(labels_array)
+    labels_test.extend(labels_list)
 
 for vid in videos_validation:
+    folder = path_frames + "video{}/".format(vid)
+    frames = glob.glob(folder + 'frame*.jpg')
+    frames = natsort.natsorted(frames)
+    filenames_validation.extend(frames)
+    labels_path = path_frames + "video{}/".format(vid) + "labels{}.npy".format(vid)
+    labels_array = np.load(labels_path)
+    labels_list = list(labels_array)
+    labels_validation.extend(labels_list)
 
-    video = path_videos + "video" + str(vid) + ".MOV"
-    #print("starting " + video)
-    cap = cv2.VideoCapture(video)
-    no_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    cap.release()
-    cv2.destroyAllWindows() 
-    list_IDs_validation[vid] = no_frames
-
-print(list_IDs_train)
-print(len(list_IDs_train))
-
-print(list_IDs_test)
-print(len(list_IDs_test))
-
-print(list_IDs_validation)
-print(len(list_IDs_validation))
 
 # %%
 # Generators

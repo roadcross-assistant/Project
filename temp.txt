@@ -1,0 +1,34 @@
+class RoadCrossData (ImageDataGenerator):
+
+    def __init__(self, train = True/False, list_ids, folder_path, **kwargs):
+
+        self.train = train
+        self.list_ids = list_ids
+        self.folder_path = folder_path
+        super().__init__(**kwargs)
+
+
+    def gen_dataframe(self):
+
+        # df with colums : frame_path and labels (0/1)
+        return df
+
+    def flow_from_dataframe(self):
+
+        super().flow_from_dataframe()
+--------------------------------------------------
+
+class RoadCrossData(ImageDataGenerator)
+
+    def __init__(self, train = True/False, list_ids, time_steps, folder_path, **kwargs)
+
+        -----
+        -----
+        -----
+        -----
+        super().__init__(**kwargs)
+
+    def flow_from_dataframe(self, **kwargs):
+
+        return TimeDistributedDataFrameIterator(df, dir, **kwargs)
+        
