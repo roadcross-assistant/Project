@@ -3,3 +3,5 @@ def run():
         print(i)
 
 run()
+
+print('test')
