@@ -5,3 +5,4 @@ def run():
 run()
 
 print('test')
+print('test2')
