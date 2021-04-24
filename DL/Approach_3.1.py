@@ -2,24 +2,17 @@
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
 #importing necessary libraries
-from __future__ import print_function
 import numpy as np
 import cv2
 import glob
-from matplotlib import pyplot as plt
 import os
 import sys
 from random import randint
 from math import ceil, sqrt
 import natsort
-import pandas as pd
 import random
-import pickle
-#from DataLoader import  DataGenerator
 import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint
-#from tensorflow.keras.applications.vgg16 import VGG16
-#from tensorflow.keras.applications.inception_v3 import InceptionV3
 from tensorflow.keras.applications import MobileNet
 
 # %%
@@ -41,32 +34,18 @@ elif user == 'aws':
     path_labels_csv = '/home/ubuntu/Data/labels_framewise_csv.csv'
     path_labels_list = '/home/ubuntu/Data/labels_framewise_list.pkl'
     path_frames = '/home/ubuntu/Data/Frames/'
+    checkpoint_path = "/home/ubuntu/checkpoints/training_3/cp.ckpt"
 
-# frame-wise labels array
-open_file = open(path_labels_list, "rb")
-labels_list = pickle.load(open_file)
-open_file.close()
 
 # %%
-#Perform train-test-validation split(62-24-18)
+#Perform train-test-validation split(66-22-16)
 
 x = np.arange(1, 105)
 np.random.shuffle(x)
 #np.random.seed(42)
-videos_validation = x[:18]
-videos_test = x[18: 18+24]
-videos_train = x[18+24: ]
-
-# videos_train = [videos[ind] for ind in indices_train]
-# videos_test = [videos[ind] for ind in indices_test]
-
-# labels_train_loaded = [labels_list[ind] for ind in indices_train]
-# labels_test_loaded = [labels_list[ind] for ind in indices_test]
-
-# print('len of videos_train: ', len(videos_train))
-# print('len of videos_test: ', len(videos_test))
-# print('len of labels_train_loaded: ', len(labels_train_loaded))
-# print('len of labels_test_loaded: ', len(labels_test_loaded))
+videos_validation = x[:16]
+videos_test = x[16: 16+22]
+videos_train = x[16+22: ]
 
 print(videos_train, len(videos_train))
 print(videos_test, len(videos_test))
@@ -80,7 +59,7 @@ labels_validation = []
 filenames_test = []
 labels_test = []
 
-# videos = [1,2]
+# videos_train = [1,2]
 # filenames = []
 # labels = []
 
@@ -94,6 +73,9 @@ for vid in videos_train:
     labels_list = list(labels_array)
     labels_train.extend(labels_list)
 
+filenames_train = np.array(filenames_train)
+labels_train = np.array(labels_train)
+
 for vid in videos_test:
     folder = path_frames + "video{}/".format(vid)
     frames = glob.glob(folder + 'frame*.jpg')
@@ -103,6 +85,9 @@ for vid in videos_test:
     labels_array = np.load(labels_path)
     labels_list = list(labels_array)
     labels_test.extend(labels_list)
+
+filenames_test = np.array(filenames_test)
+labels_test = np.array(labels_test)
 
 for vid in videos_validation:
     folder = path_frames + "video{}/".format(vid)
@@ -114,8 +99,33 @@ for vid in videos_validation:
     labels_list = list(labels_array)
     labels_validation.extend(labels_list)
 
-print(len(filenames_train), len(filenames_validation), len(filenames_test))
-print(len(labels_train), len(labels_validation), len(labels_test))
+filenames_validation = np.array(filenames_validation)
+labels_validation = np.array(labels_validation)
+
+print(filenames_train.shape, filenames_validation.shape, filenames_test.shape)
+print(labels_train.shape, labels_validation.shape, labels_test.shape)
+
+
+#%%
+
+ind0 = np.where(labels_train==0)[0]
+ind1 = np.where(labels_train==1)[0]
+random.shuffle(ind0)
+random.shuffle(ind1)
+
+if (ind0.shape[0]/ind1.shape[0] > 1.4):
+    print('reducing the number of unsafe frames in dataframe\n\n')
+    len_ind0 = int(ind1.shape[0]*1.4)
+    ind0 = ind0[:len_ind0]
+
+    indices_required = np.concatenate((ind0, ind1))
+
+filenames_train_reduced = filenames_train[indices_required]
+labels_train_reduced = labels_train[indices_required]
+
+print(filenames_train_reduced.shape, labels_train_reduced.shape)
+
+print(ind0.shape, ind1.shape)
 
 
 # %%
@@ -137,7 +147,7 @@ def train_preprocess(image, label):
 
     return image, label
 
-dataset_train = tf.data.Dataset.from_tensor_slices((filenames_train,labels_train))
+dataset_train = tf.data.Dataset.from_tensor_slices((filenames_train_reduced,labels_train_reduced))
 dataset_train = dataset_train.shuffle(len(filenames_train))
 dataset_train = dataset_train.map(parse_function, num_parallel_calls=4)
 dataset_train = dataset_train.map(train_preprocess, num_parallel_calls=4)
@@ -145,7 +155,7 @@ dataset_train = dataset_train.map(train_preprocess, num_parallel_calls=4)
 #dataset_train = dataset_train.shuffle(len(filenames_train))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
 #d = d.map(lambda a,b : (a,b[-1]))
-dataset_train = dataset_train.batch(32)
+dataset_train = dataset_train.batch(16)
 dataset_train = dataset_train.prefetch(1)
 
 dataset_test = tf.data.Dataset.from_tensor_slices((filenames_test,labels_test))
@@ -156,7 +166,7 @@ dataset_test = dataset_test.map(train_preprocess, num_parallel_calls=4)
 #dataset_test = dataset_test.shuffle(len(filenames_test))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
 #d = d.map(lambda a,b : (a,b[-1]))
-dataset_test = dataset_test.batch(32)
+dataset_test = dataset_test.batch(16)
 dataset_test = dataset_test.prefetch(1)
 
 dataset_val = tf.data.Dataset.from_tensor_slices((filenames_validation,labels_validation))
@@ -167,7 +177,7 @@ dataset_val = dataset_val.map(train_preprocess, num_parallel_calls=4)
 #dataset_val = dataset_val.shuffle(len(filenames_validation))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
 #d = d.map(lambda a,b : (a,b[-1]))
-dataset_val = dataset_val.batch(32)
+dataset_val = dataset_val.batch(16)
 dataset_val = dataset_val.prefetch(1)
 
 # %%
@@ -190,7 +200,7 @@ def create_model():
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=tf.keras.optimizers.Adam(),
-        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.93, name='acc')])
+        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='acc')])
 
     return model
 
@@ -199,7 +209,7 @@ model.summary()
 
 # %%
 #history = model.fit_generator(train_generator, shuffle='true', epochs=1, verbose=1, batch_size=16)
-checkpoint_path = "/home/ubuntu/checkpoints/training_3/cp.ckpt"
+#checkpoint_path = "/home/ubuntu/checkpoints/training_3/cp.ckpt"
 checkpoint_dir = os.path.dirname(checkpoint_path)
 
 # Create a callback that saves the model's weights
@@ -208,7 +218,7 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                  save_best_only=True, mode='max')
 
 history = model.fit(x=dataset_train, validation_data=dataset_val, epochs=70, 
-                                verbose=1, callbacks = [cp_callback], class_weight = {0: 1 , 1:1.92})
+                                verbose=1, callbacks = [cp_callback], class_weight = {0: 1 , 1:2.5})
 
 # %%
 print("Evaluate on test data")
