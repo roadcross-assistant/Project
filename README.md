@@ -56,13 +56,13 @@ Approach 2.2 is similar to Approach 2.1, in which we have used multi-frame featu
 
 &nbsp;
 
-### 2. Deep Learning-based Approach
+### 2. Deep Learning-based Approach (In progress)
 
-In this Approach, We have developed a custom(modified) deep learning architecture for predicting safe/unsafe labels for a frame and frame sequence.
+Deep Learning has been shown to learn highly effective features from image and video data, yielding high accuracy in many tasks. Therefore in this approach we will be extensively working on different CNN architectures and also perform training experiments.
 
 #### [**Approach 3.1** ![Approach 3.1](https://img.icons8.com/fluent-systems-filled/18/0366D6/external-link.png)](https://github.com/roadcross-assistant/Project/blob/master/DL/Approach_3.1.py)
 
-Approach 3.1 is developed based on the SSD-MobileNetv2 neural network and we have also used CustomDataLoader class to load the saved video frames by dividing them batch-wise.
+Approach 3.1 is developed based on the SSD-MobileNetv2 neural network. Also, Building the input pipeline for our project required building a custom dataset using tensorflow’s dataset module (tf.data) since tensorflow does not have an option to generate baches of video data.
 
 &nbsp;
 
