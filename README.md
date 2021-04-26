@@ -62,7 +62,7 @@ Deep Learning has been shown to learn highly effective features from image and v
 
 #### [**Approach 3.1** ![Approach 3.1](https://img.icons8.com/fluent-systems-filled/18/0366D6/external-link.png)](https://github.com/roadcross-assistant/Project/blob/master/DL/Approach_3.1.py)
 
-Approach 3.1 is developed based on the SSD-MobileNetv2 neural network. Also, Building the input pipeline for our project required building a custom dataset using tensorflow’s dataset module (tf.data) since tensorflow does not have an option to generate baches of video data.
+Approach 3.1 is developed based on the SSD-MobileNetv2 neural network. Also, building the input pipeline for our project required building a custom dataset using tensorflow’s dataset module (tf.data) since tensorflow does not have an option to generate baches of video data.
 
 &nbsp;
 
