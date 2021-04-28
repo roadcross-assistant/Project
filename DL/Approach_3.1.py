@@ -189,20 +189,24 @@ def create_model():
     inputs_preprocessed = tf.keras.applications.mobilenet_v2.preprocess_input(inputs)
 
 
-    base_model = MobileNetV2(include_top = False, weights = 'imagenet')(inputs_preprocessed)
+    base_model = MobileNetV2(include_top = False, weights = 'imagenet')(inputs_preprocessed, training =False)
     # for layer in base_model.layers:
     #     layer.trainable = False
-
-    x = tf.keras.layers.Flatten()(base_model.output)
-    x = tf.keras.layers.Dense(1024, activation='relu')(x)
+    x = tf.keras.layers.GlobalAveragePooling2D()(base_model)
+    #x = tf.keras.layers.Flatten()(base_model.output)
+    #x = tf.keras.layers.Dense(1024, activation='relu')(x)
     x = tf.keras.layers.Dense(512, activation='relu')(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
     x = tf.keras.layers.Dense(256, activation='relu')(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
     x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+
+    base_learning_rate = 0.0001
 
     model = tf.keras.models.Model(base_model.input, x)
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
-        optimizer=tf.keras.optimizers.Adam(),
+        optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate/5),
         metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='acc')])
 
     return model
@@ -220,7 +224,7 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                  save_weights_only=True, monitor='val_acc', verbose=1, 
                                                  save_best_only=True, mode='max')
 
-history = model.fit(x=dataset_train, validation_data=dataset_val, epochs=70, 
+history = model.fit(x=dataset_train, validation_data=dataset_val, epochs=200, 
                                 verbose=1, callbacks = [cp_callback], class_weight = {0: 1 , 1:2})
 
 # %%
