@@ -147,7 +147,7 @@ def train_preprocess(image, label):
 dataset_train = tf.data.Dataset.from_tensor_slices((filenames_train,labels_train))
 dataset_train = dataset_train.shuffle(len(filenames_train))
 dataset_train = dataset_train.map(parse_function, num_parallel_calls=4)
-#dataset_train = dataset_train.map(train_preprocess, num_parallel_calls=4)
+dataset_train = dataset_train.map(train_preprocess, num_parallel_calls=4)
 #d = d.window(2)
 #dataset_train = dataset_train.shuffle(len(filenames_train))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
@@ -229,7 +229,7 @@ inputs_preprocessed = tf.keras.applications.mobilenet_v2.preprocess_input(inputs
 x = base_model(inputs_preprocessed, training=False)
 x = tf.keras.layers.GlobalAveragePooling2D()(x)
 x = tf.keras.layers.Dropout(0.2)(x)  # Regularize with dropout
-outputs = tf.keras.layers.Dense(1)(x)
+outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
 model = tf.keras.Model(inputs, outputs)
 
 model.summary()
