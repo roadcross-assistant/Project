@@ -1,8 +1,1 @@
-def run():
-    for i in range(1000000000000000000000):
-        print(i)
-
-run()
-
-print('test')
-print('test2')
+print("hh\n\n\n\n\ne")
