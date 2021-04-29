@@ -135,7 +135,7 @@ def parse_function(filename, label):
     image = tf.io.read_file(filename)
     image = tf.image.decode_jpeg(image)
     image = tf.image.convert_image_dtype(image, tf.float32)
-    image = tf.image.resize(image, [540, 960], method=tf.image.ResizeMethod.AREA, 
+    image = tf.image.resize(image, [270, 480], method=tf.image.ResizeMethod.AREA, 
                             preserve_aspect_ratio=True)
     
     return image, label
@@ -150,7 +150,7 @@ def train_preprocess(image, label):
 dataset_train = tf.data.Dataset.from_tensor_slices((filenames_train_reduced,labels_train_reduced))
 dataset_train = dataset_train.shuffle(len(filenames_train_reduced))
 dataset_train = dataset_train.map(parse_function, num_parallel_calls=4)
-#dataset_train = dataset_train.map(train_preprocess, num_parallel_calls=4)
+dataset_train = dataset_train.map(train_preprocess, num_parallel_calls=4)
 #d = d.window(2)
 #dataset_train = dataset_train.shuffle(len(filenames_train))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
@@ -161,7 +161,7 @@ dataset_train = dataset_train.prefetch(1)
 dataset_test = tf.data.Dataset.from_tensor_slices((filenames_test,labels_test))
 dataset_test = dataset_test.shuffle(len(filenames_test))
 dataset_test = dataset_test.map(parse_function, num_parallel_calls=4)
-#dataset_test = dataset_test.map(train_preprocess, num_parallel_calls=4)
+dataset_test = dataset_test.map(train_preprocess, num_parallel_calls=4)
 #d = d.window(2)
 #dataset_test = dataset_test.shuffle(len(filenames_test))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
@@ -172,7 +172,7 @@ dataset_test = dataset_test.prefetch(1)
 dataset_val = tf.data.Dataset.from_tensor_slices((filenames_validation,labels_validation))
 dataset_val = dataset_val.shuffle(len(filenames_validation))
 dataset_val = dataset_val.map(parse_function, num_parallel_calls=4)
-#dataset_val = dataset_val.map(train_preprocess, num_parallel_calls=4)
+dataset_val = dataset_val.map(train_preprocess, num_parallel_calls=4)
 #d = d.window(2)
 #dataset_val = dataset_val.shuffle(len(filenames_validation))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
@@ -203,7 +203,7 @@ def create_model():
 
     base_learning_rate = 0.0001
 
-    model = tf.keras.models.Model(base_model.input, x)
+    model = tf.keras.models.Model(inputs, x)
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate/5),
@@ -224,7 +224,7 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                  save_weights_only=True, monitor='val_acc', verbose=1, 
                                                  save_best_only=True, mode='max')
 
-history = model.fit(x=dataset_train, validation_data=dataset_val, epochs=200, 
+history = model.fit(x=dataset_train, validation_data=dataset_val, epochs=400, 
                                 verbose=1, callbacks = [cp_callback], class_weight = {0: 1 , 1:2})
 
 # %%
