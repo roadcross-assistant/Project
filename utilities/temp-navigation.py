@@ -1,6 +1,7 @@
 import cv2
 import pickle
 import pyttsx3
+import random
 
 """ For Camera Input
 def gstreamer_pipeline(
@@ -51,7 +52,7 @@ def speak_command(command_text):
 
 def initialize_commands():
     global WELCOME_COMMAND
-    WELCOME_COMMAND = "Welcome to Roadcross Assistant! Please wait while we are loading the camera and prediction Model"
+    WELCOME_COMMAND = "Welcome to Roadcrossing Assistant! Please wait while we are loading the camera and prediction Model"
     global SAFE_COMMAND
     SAFE_COMMAND = "It is Safe to cross roads now. You are Good to go!"
     global UNSAFE_COMMAND
@@ -59,14 +60,16 @@ def initialize_commands():
         "Please don't go futher, It is not safe to cross the roads."
     )
     global CLOSING_COMMAND
-    CLOSING_COMMAND = (
-        "Thanks for RoadCrossing Assistant. We hope it's been useful to you."
-    )
+    CLOSING_COMMAND = "Thanks for using RoadCrossing Assistant. We hope it's been useful to you."
+
+
+def generate_random_label():
+    return random.randint(0, 1)
 
 
 def cross_roads_main_func(video):
 
-    loaded_model = load_model_from_path()
+    # loaded_model = load_model_from_path()
     cap = cv2.VideoCapture(video)  # static video input
 
     # for camera input
@@ -80,18 +83,21 @@ def cross_roads_main_func(video):
     safe_speak_flag = False
     unsafe_speak_flag = False
 
+    speak_command(WELCOME_COMMAND)
     while cap.isOpened():
         success, frame = cap.read()
         if success:
             frame_count = frame_count + 1
 
-            img = cv2.resize(frame, (480, 270))
-            inp = img.reshape((1, 270, 480, 3))
-            oup = loaded_model.predict(inp)[0][0]
+            # img = cv2.resize(frame, (480, 270))
+            # inp = img.reshape((1, 270, 480, 3))
+            # oup = loaded_model.predict(inp)[0][0]
 
-            # assuming that we are getting the predictions per frame
+            oup = generate_random_label()
+
             labels[frame_count] = oup
 
+            # assuming that we are getting the predictions per frame
             if oup == 1:  # safe frame
                 unsafe_frame_count = 0
                 safe_frame_count = safe_frame_count + 1
@@ -115,10 +121,12 @@ def cross_roads_main_func(video):
         # print(labels)
     cap.release()
 
+    speak_command(CLOSING_COMMAND)
+
 
 if __name__ == "__main__":
 
     initialize_commands()
     cross_roads_main_func(
-        "/home1/RoadCrossingAssistant_FY_Project_Data/videos/video2.MOV"
+        "C:/Users/yagnesh.patil/Documents/Personal/RoadCrossingAssistant_Data/Videos/video3.MOV"
     )
