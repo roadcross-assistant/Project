@@ -195,12 +195,12 @@ def create_model():
     x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.Conv2D(128, (3,3), padding='same', activation='relu')(x)
     x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
-    x = tf.keras.layers.Conv2D(128, (3,3),dilation_rate=(3,3), padding='same', activation='relu')(x)
-    x = tf.keras.layers.Conv2D(128, (3,3), dilation_rate=(5,5), padding='same', activation='relu')(x)
+    # x = tf.keras.layers.Conv2D(128, (3,3),dilation_rate=(3,3), padding='same', activation='relu')(x)
+    # x = tf.keras.layers.Conv2D(128, (3,3), dilation_rate=(5,5), padding='same', activation='relu')(x)
     x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    x = tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-4))(x)
-    x = tf.keras.layers.Dropout(0.3)(x)
     x = tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-4))(x)
+    x = tf.keras.layers.Dropout(0.4)(x)
+    x = tf.keras.layers.Dense(32, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-4))(x)
     x = tf.keras.layers.Dropout(0.3)(x)
     outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
     model = tf.keras.Model(inputs, outputs)
@@ -223,7 +223,7 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                   save_best_only=True, mode='max')
 
 model.fit(x=dataset_train, validation_data=dataset_val, epochs=400, 
-                                verbose=1,callbacks = [cp_callback], class_weight = {0: 1 , 1:2})
+                                verbose=1,callbacks = [cp_callback], class_weight = {0: 1 , 1:1.92})
 
 # %%
 # checkpoint_dir = os.path.dirname(checkpoint_path)
