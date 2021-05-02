@@ -6,4 +6,7 @@
 # Ignore all local history of files
 **/.history
 
+#ignore pickle files
+*.pkl
+
 __pycache__/*
