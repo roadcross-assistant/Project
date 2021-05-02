@@ -34,7 +34,7 @@ elif user == 'aws':
     path_labels_csv = '/home/ubuntu/Data/labels_framewise_csv.csv'
     path_labels_list = '/home/ubuntu/Data/labels_framewise_list.pkl'
     path_frames = '/home/ubuntu/Data/Frames/'
-    checkpoint_path = "/home/ubuntu/checkpoints/training_4/cp.ckpt"
+    checkpoint_path = "/home/ubuntu/checkpoints/training_siddhi/cp.ckpt"
 
 
 # %%
@@ -144,15 +144,15 @@ def train_preprocess(image, label):
 
     return image, label
 
-dataset_train = tf.data.Dataset.from_tensor_slices((filenames_train_reduced,labels_train_reduced))
-dataset_train = dataset_train.shuffle(len(filenames_train_reduced))
+dataset_train = tf.data.Dataset.from_tensor_slices((filenames_train,labels_train))
+dataset_train = dataset_train.shuffle(len(filenames_train))
 dataset_train = dataset_train.map(parse_function, num_parallel_calls=4)
 dataset_train = dataset_train.map(train_preprocess, num_parallel_calls=4)
 #d = d.window(2)
 #dataset_train = dataset_train.shuffle(len(filenames_train))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
 #d = d.map(lambda a,b : (a,b[-1]))
-dataset_train = dataset_train.batch(32)
+dataset_train = dataset_train.batch(16)
 dataset_train = dataset_train.prefetch(1)
 
 dataset_test = tf.data.Dataset.from_tensor_slices((filenames_test,labels_test))
@@ -163,7 +163,7 @@ dataset_test = dataset_test.map(parse_function, num_parallel_calls=4)
 #dataset_test = dataset_test.shuffle(len(filenames_test))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
 #d = d.map(lambda a,b : (a,b[-1]))
-dataset_test = dataset_test.batch(32)
+dataset_test = dataset_test.batch(16)
 dataset_test = dataset_test.prefetch(1)
 
 dataset_val = tf.data.Dataset.from_tensor_slices((filenames_validation,labels_validation))
@@ -174,7 +174,7 @@ dataset_val = dataset_val.map(parse_function, num_parallel_calls=4)
 #dataset_val = dataset_val.shuffle(len(filenames_validation))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
 #d = d.map(lambda a,b : (a,b[-1]))
-dataset_val = dataset_val.batch(32)
+dataset_val = dataset_val.batch(16)
 dataset_val = dataset_val.prefetch(1)
 
 # %%
@@ -199,9 +199,9 @@ def create_model():
     x = tf.keras.layers.Conv2D(128, (3,3), dilation_rate=(5,5), padding='same', activation='relu')(x)
     x = tf.keras.layers.GlobalAveragePooling2D()(x)
     x = tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-4))(x)
-    x = tf.keras.layers.Dropout(0.5)(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
     x = tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-4))(x)
-    x = tf.keras.layers.Dropout(0.5)(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
     outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
     model = tf.keras.Model(inputs, outputs)
     
@@ -222,7 +222,7 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                   save_weights_only=True, monitor='val_acc', verbose=1, 
                                                   save_best_only=True, mode='max')
 
-model.fit(x=dataset_train, validation_data=dataset_val, epochs=200, 
+model.fit(x=dataset_train, validation_data=dataset_val, epochs=400, 
                                 verbose=1,callbacks = [cp_callback], class_weight = {0: 1 , 1:2})
 
 # %%
@@ -245,4 +245,14 @@ print("Evaluate on train data")
 results = model.evaluate(dataset_train)
 print("train loss, trai acc:", results)
 
+
+#%%
+model.load_weights(checkpoint_path)
+print("Evaluate on test data")
+results = model.evaluate(dataset_test)
+print("test loss, test acc:", results)
+
+print("Evaluate on train data")
+results = model.evaluate(dataset_train)
+print("train loss, trai acc:", results)
 
