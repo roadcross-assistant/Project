@@ -105,24 +105,24 @@ print(labels_train.shape, labels_validation.shape, labels_test.shape)
 
 #%%
 
-ind0 = np.where(labels_train==0)[0]
-ind1 = np.where(labels_train==1)[0]
-random.shuffle(ind0)
-random.shuffle(ind1)
+# ind0 = np.where(labels_train==0)[0]
+# ind1 = np.where(labels_train==1)[0]
+# random.shuffle(ind0)
+# random.shuffle(ind1)
 
-if (ind0.shape[0]/ind1.shape[0] > 1.4):
-    print('reducing the number of unsafe frames in dataframe\n\n')
-    len_ind0 = int(ind1.shape[0]*1.4)
-    ind0 = ind0[:len_ind0]
+# if (ind0.shape[0]/ind1.shape[0] > 1.4):
+#     print('reducing the number of unsafe frames in dataframe\n\n')
+#     len_ind0 = int(ind1.shape[0]*1.4)
+#     ind0 = ind0[:len_ind0]
 
-    indices_required = np.concatenate((ind0, ind1))
+#     indices_required = np.concatenate((ind0, ind1))
 
-filenames_train_reduced = filenames_train[indices_required]
-labels_train_reduced = labels_train[indices_required]
+# filenames_train_reduced = filenames_train[indices_required]
+# labels_train_reduced = labels_train[indices_required]
 
-print(filenames_train_reduced.shape, labels_train_reduced.shape)
+# print(filenames_train_reduced.shape, labels_train_reduced.shape)
 
-print(ind0.shape, ind1.shape)
+# print(ind0.shape, ind1.shape)
 
 
 # %%
@@ -144,15 +144,15 @@ def train_preprocess(image, label):
 
     return image, label
 
-dataset_train = tf.data.Dataset.from_tensor_slices((filenames_train_reduced,labels_train_reduced))
-dataset_train = dataset_train.shuffle(len(filenames_train_reduced))
+dataset_train = tf.data.Dataset.from_tensor_slices((filenames_train,labels_train))
+dataset_train = dataset_train.shuffle(len(filenames_train))
 dataset_train = dataset_train.map(parse_function, num_parallel_calls=4)
 dataset_train = dataset_train.map(train_preprocess, num_parallel_calls=4)
 #d = d.window(2)
 #dataset_train = dataset_train.shuffle(len(filenames_train))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
 #d = d.map(lambda a,b : (a,b[-1]))
-dataset_train = dataset_train.batch(32)
+dataset_train = dataset_train.batch(16)
 dataset_train = dataset_train.prefetch(1)
 
 dataset_test = tf.data.Dataset.from_tensor_slices((filenames_test,labels_test))
@@ -163,7 +163,7 @@ dataset_test = dataset_test.map(parse_function, num_parallel_calls=4)
 #dataset_test = dataset_test.shuffle(len(filenames_test))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
 #d = d.map(lambda a,b : (a,b[-1]))
-dataset_test = dataset_test.batch(32)
+dataset_test = dataset_test.batch(16)
 dataset_test = dataset_test.prefetch(1)
 
 dataset_val = tf.data.Dataset.from_tensor_slices((filenames_validation,labels_validation))
@@ -174,7 +174,7 @@ dataset_val = dataset_val.map(parse_function, num_parallel_calls=4)
 #dataset_val = dataset_val.shuffle(len(filenames_validation))
 #d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
 #d = d.map(lambda a,b : (a,b[-1]))
-dataset_val = dataset_val.batch(32)
+dataset_val = dataset_val.batch(16)
 dataset_val = dataset_val.prefetch(1)
 
 # %%
@@ -228,7 +228,7 @@ inputs_preprocessed = tf.keras.applications.mobilenet_v2.preprocess_input(inputs
 
 x = base_model(inputs_preprocessed, training=False)
 x = tf.keras.layers.GlobalAveragePooling2D()(x)
-x = tf.keras.layers.Dropout(0.5)(x)  # Regularize with dropout
+x = tf.keras.layers.Dropout(0.2)(x)  # Regularize with dropout
 outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
 model = tf.keras.Model(inputs, outputs)
 
@@ -239,7 +239,7 @@ model.compile(
         optimizer=tf.keras.optimizers.Adam(),
         metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='acc')])
 
-model.fit(x=dataset_train, validation_data=dataset_val, epochs=50, 
+model.fit(x=dataset_train, validation_data=dataset_val, epochs=30, 
                                 verbose=1,  class_weight = {0: 1 , 1:2})
 
 #%%
@@ -248,18 +248,17 @@ print("now onto 2nd part \n\n\n\n\n\n\n\n\n")
 
 base_model.trainable = True
 model.summary()
-
+checkpoint_dir = os.path.dirname(checkpoint_path)
+cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+                                                 save_weights_only=True, monitor='val_acc', verbose=1, 
+                                                 save_best_only=True, mode='max')
 model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=tf.keras.optimizers.Adam(1e-5),
         metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='acc')])
 
-cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-                                                  save_weights_only=True, monitor='val_acc', verbose=1, 
-                                                  save_best_only=True, mode='max')
-
-model.fit(x=dataset_train, validation_data=dataset_val, epochs=200, 
-                                verbose=1,callbacks = [cp_callback], class_weight = {0: 1 , 1:2})
+model.fit(x=dataset_train, validation_data=dataset_val, epochs=100, 
+                                verbose=1, callbacks = [cp_callback] ,class_weight = {0: 1 , 1:2})
 
 # %%
 # #history = model.fit_generator(train_generator, shuffle='true', epochs=1, verbose=1, batch_size=16)
@@ -293,9 +292,11 @@ print("train loss, trai acc:", results)
 
 
 # %%
-# from sklearn.metrics import average_precision_score
-# average_precision = average_precision_score(np.argmax(y_test, axis = 1), np.argmax(predictions, axis = 1))
+model.load_weights(checkpoint_path)
+print("Evaluate on test data")
+results = model.evaluate(dataset_test)
+print("test loss, test acc:", results)
 
-# print('Average precision-recall score: {0:0.2f}'.format(
-#       average_precision))
-
+print("Evaluate on train data")
+results = model.evaluate(dataset_train)
+print("train loss, trai acc:", results)
