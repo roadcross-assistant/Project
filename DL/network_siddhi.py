@@ -180,79 +180,43 @@ dataset_val = dataset_val.prefetch(1)
 # %%
 tf.keras.backend.set_image_data_format('channels_last')
 
-# def create_model():
+def create_model():
 
-#     inputs = tf.keras.layers.Input([270, 480, 3])
-#     inputs_preprocessed = tf.keras.applications.mobilenet_v2.preprocess_input(inputs)
+    inputs = tf.keras.layers.Input([270, 480, 3])
+    x = tf.keras.layers.BatchNormalization()(inputs)
+    x = tf.keras.layers.Conv2D(64, (7,7), padding='same', activation='relu')(x)
+    x = tf.keras.layers.Conv2D(64, (7,7), padding='same', activation='relu')(x)
+    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
+    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
+    x = tf.keras.layers.Conv2D(128  , (3,3), padding='same', activation='relu')(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.Conv2D(128, (3,3), padding='same', activation='relu')(x)
+    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
+    x = tf.keras.layers.Conv2D(128, (3,3),dilation_rate=(3,3), padding='same', activation='relu')(x)
+    x = tf.keras.layers.Conv2D(128, (3,3), dilation_rate=(5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    x = tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-4))(x)
+    x = tf.keras.layers.Dropout(0.5)(x)
+    x = tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-4))(x)
+    x = tf.keras.layers.Dropout(0.5)(x)
+    outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+    model = tf.keras.Model(inputs, outputs)
+    
+    model.compile(
+        loss=tf.keras.losses.BinaryCrossentropy(),
+        optimizer=tf.keras.optimizers.Adam(lr=0.001),
+        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='acc')])
 
+    return model
 
-#     base_model = MobileNetV2(include_top = False, weights = 'imagenet')(inputs_preprocessed, training =False)
-#     # for layer in base_model.layers:
-#     #     layer.trainable = False
-#     x = tf.keras.layers.GlobalAveragePooling2D()(base_model)
-#     #x = tf.keras.layers.Flatten()(base_model.output)
-#     #x = tf.keras.layers.Dense(1024, activation='relu')(x)
-#     x = tf.keras.layers.Dense(512, activation='relu')(x)
-#     x = tf.keras.layers.Dropout(0.3)(x)
-#     x = tf.keras.layers.Dense(256, activation='relu')(x)
-#     x = tf.keras.layers.Dropout(0.3)(x)
-#     x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
-
-#     base_learning_rate = 0.0001
-
-#     model = tf.keras.models.Model(base_model.input, x)
-#     model.compile(
-#         loss=tf.keras.losses.BinaryCrossentropy(),
-#         optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate/5),
-#         metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='acc')])
-
-#     return model
-
-# model = create_model()
-# model.summary()
+model = create_model()
+model.summary()
 
 
 #%%
-
-base_model = tf.keras.applications.MobileNetV2(
-    weights="imagenet",  # Load weights pre-trained on ImageNet.
-    input_shape=(270, 480, 3),
-    include_top=False,
-)
-
-# Freeze the base_model
-base_model.trainable = False
-
-inputs = tf.keras.layers.Input([270, 480, 3])
-inputs_preprocessed = tf.keras.applications.mobilenet_v2.preprocess_input(inputs)
-
-x = base_model(inputs_preprocessed, training=False)
-x = tf.keras.layers.GlobalAveragePooling2D()(x)
-x = tf.keras.layers.Dropout(0.5)(x)  # Regularize with dropout
-outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
-model = tf.keras.Model(inputs, outputs)
-
-model.summary()
-
-model.compile(
-        loss=tf.keras.losses.BinaryCrossentropy(),
-        optimizer=tf.keras.optimizers.Adam(),
-        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='acc')])
-
-model.fit(x=dataset_train, validation_data=dataset_val, epochs=50, 
-                                verbose=1,  class_weight = {0: 1 , 1:2})
-
-#%%
-
-print("now onto 2nd part \n\n\n\n\n\n\n\n\n")
-
-base_model.trainable = True
-model.summary()
-
-model.compile(
-        loss=tf.keras.losses.BinaryCrossentropy(),
-        optimizer=tf.keras.optimizers.Adam(1e-5),
-        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='acc')])
 
 cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                   save_weights_only=True, monitor='val_acc', verbose=1, 
@@ -262,8 +226,6 @@ model.fit(x=dataset_train, validation_data=dataset_val, epochs=200,
                                 verbose=1,callbacks = [cp_callback], class_weight = {0: 1 , 1:2})
 
 # %%
-# #history = model.fit_generator(train_generator, shuffle='true', epochs=1, verbose=1, batch_size=16)
-# #checkpoint_path = "/home/ubuntu/checkpoints/training_3/cp.ckpt"
 # checkpoint_dir = os.path.dirname(checkpoint_path)
 
 # # Create a callback that saves the model's weights
@@ -282,16 +244,5 @@ print("test loss, test acc:", results)
 print("Evaluate on train data")
 results = model.evaluate(dataset_train)
 print("train loss, trai acc:", results)
-
-# Generate predictions (probabilities -- the output of the last layer)
-# on new data using `predict`
-# print("Generate predictions")
-# predictions = model.predict(frames_test)
-# print("predictions shape:", predictions.shape)
-# print(predictions[:10])
-
-
-
-# %%
 
 
