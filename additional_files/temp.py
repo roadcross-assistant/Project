@@ -1,8 +1,1 @@
-a = {1:10, 2:5, 3:6}
-
-for keys in a:
-    print(a[keys])
-
-print(sum(a.values()))
-
-print(list(a.keys()))
+x = tf.keras.layers.Dropout(0.3)(x)
