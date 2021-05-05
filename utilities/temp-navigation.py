@@ -2,6 +2,7 @@ import cv2
 import pickle
 import pyttsx3
 import random
+import numpy as np
 
 """ For Camera Input
 def gstreamer_pipeline(
@@ -76,7 +77,10 @@ def cross_roads_main_func(video):
     # cap = cv2.VideoCapture(gstreamer_pipline(flip_method=0), cv2.CAP_GSTREAMER)
 
     no_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    labels = [0] * no_frames
+    # labels = [0] * no_frames
+    labels = np.load(
+        "C:/Users/yagnesh.patil/Documents/Personal/RoadCrossingAssistant_Data/Trained Models/temp labels/labels2.npy"
+    )
     frame_count = -1
     safe_frame_count = 0
     unsafe_frame_count = 0
@@ -87,18 +91,42 @@ def cross_roads_main_func(video):
     while cap.isOpened():
         success, frame = cap.read()
         if success:
+            if frame_count == -1:
+                frame = cv2.resize(frame, (1080, 720))
+                while True:
+                    key_init = cv2.waitKey(25)
+                    cv2.imshow(video, frame)
+                    if key_init == ord("a"):
+                        break
+
             frame_count = frame_count + 1
 
-            # img = cv2.resize(frame, (480, 270))
             # inp = img.reshape((1, 270, 480, 3))
             # oup = loaded_model.predict(inp)[0][0]
 
-            oup = generate_random_label()
+            # oup = generate_random_label()
 
-            labels[frame_count] = oup
+            frame = cv2.resize(frame, (1080, 720))
+            oup = labels[frame_count]
 
             # assuming that we are getting the predictions per frame
             if oup == 1:  # safe frame
+                cv2.rectangle(
+                    frame, (1576, 3), (1890, 95), (0, 200, 0), thickness=-1
+                )
+                frame_save = cv2.putText(
+                    frame,
+                    "SAFE",
+                    (1580, 90),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    4,
+                    (255, 255, 255),
+                    6,
+                    cv2.LINE_AA,
+                )
+                cv2.imshow(video, frame_save)
+                cv2.waitKey(34)
+
                 unsafe_frame_count = 0
                 safe_frame_count = safe_frame_count + 1
 
@@ -107,6 +135,22 @@ def cross_roads_main_func(video):
                     safe_speak_flag = True
                     unsafe_speak_flag = False
             else:
+                cv2.rectangle(
+                    frame, (1396, 3), (1890, 95), (0, 0, 200), thickness=-1
+                )
+                frame_save = cv2.putText(
+                    frame,
+                    "UNSAFE",
+                    (1400, 90),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    4,
+                    (255, 255, 255),
+                    6,
+                    cv2.LINE_AA,
+                )
+                cv2.imshow(video, frame_save)
+                cv2.waitKey(34)
+
                 safe_frame_count = 0
                 unsafe_frame_count = unsafe_frame_count + 1
 
@@ -121,12 +165,12 @@ def cross_roads_main_func(video):
         # print(labels)
     cap.release()
 
-    speak_command(CLOSING_COMMAND)
+    # speak_command(CLOSING_COMMAND)
 
 
 if __name__ == "__main__":
 
     initialize_commands()
     cross_roads_main_func(
-        "C:/Users/yagnesh.patil/Documents/Personal/RoadCrossingAssistant_Data/Videos/video3.MOV"
+        "C:/Users/yagnesh.patil/Documents/Personal/RoadCrossingAssistant_Data/Videos/video2.MOV"
     )
