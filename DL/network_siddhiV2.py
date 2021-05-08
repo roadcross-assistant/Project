@@ -239,7 +239,7 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                   save_weights_only=True, monitor='val_recallAtPrecision', verbose=1, 
                                                   save_best_only=True, mode='max')
 
-model.fit(x=dataset_train, validation_data=dataset_val, epochs=400, 
+model.fit(x=dataset_train, validation_data=dataset_val, epochs=300, 
                                 verbose=1,callbacks = [cp_callback], class_weight = {0: 1 , 1:1.92})
 
 
@@ -279,5 +279,5 @@ print(model.predict(test_input))
 model.save('/home/ubuntu/savedmodel_training_siddhiV2')
 
 loaded = tf.keras.models.load_model('/home/ubuntu/savedmodel_training_siddhiV2')
-print(loaded.predict(inp))
+print(loaded.predict(test_input))
 
