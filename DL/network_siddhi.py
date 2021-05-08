@@ -34,7 +34,7 @@ elif user == 'aws':
     path_labels_csv = '/home/ubuntu/Data/labels_framewise_csv.csv'
     path_labels_list = '/home/ubuntu/Data/labels_framewise_list.pkl'
     path_frames = '/home/ubuntu/Data/Frames/'
-    checkpoint_path = "/home/ubuntu/checkpoints/training_siddhi/cp.ckpt"
+    checkpoint_path = "/home/ubuntu/checkpoints/training_temp/cp.ckpt"
 
 
 # %%
@@ -134,13 +134,15 @@ def parse_function(filename, label):
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize(image, [270, 480], method=tf.image.ResizeMethod.AREA, 
                             preserve_aspect_ratio=True)
-    
+    image = tf.image.random_crop(image, size=[270,270,3])
     return image, label
 
 
 def train_preprocess(image, label):
 
     image = tf.image.random_brightness(image, 0.15)
+    image = tf.image.random_contrast(image, 0.8, 1.5)
+    image = tf.image.random_saturation(image, 0.6, 3)
 
     return image, label
 
@@ -183,32 +185,38 @@ tf.keras.backend.set_image_data_format('channels_last')
 def create_model():
 
     inputs = tf.keras.layers.Input([270, 480, 3])
-    x = tf.keras.layers.BatchNormalization()(inputs)
-    x = tf.keras.layers.Conv2D(64, (7,7), padding='same', activation='relu')(x)
-    x = tf.keras.layers.Conv2D(64, (7,7), padding='same', activation='relu')(x)
-    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
-    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.experimental.preprocessing.Normalization(inputs)
+    #x = tf.keras.layers.BatchNormalization()(inputs)
+    x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(x)
+    x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
-    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
-    x = tf.keras.layers.Conv2D(128  , (3,3), padding='same', activation='relu')(x)
-    x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.Conv2D(128, (3,3), padding='same', activation='relu')(x)
-    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
-    # x = tf.keras.layers.Conv2D(128, (3,3),dilation_rate=(3,3), padding='same', activation='relu')(x)
-    # x = tf.keras.layers.Conv2D(128, (3,3), dilation_rate=(5,5), padding='same', activation='relu')(x)
-    x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    x = tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-4))(x)
-    x = tf.keras.layers.Dropout(0.4)(x)
-    x = tf.keras.layers.Dense(32, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-4))(x)
     x = tf.keras.layers.Dropout(0.3)(x)
+    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
+    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
+    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
+    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.Conv2D(128  , (5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
+    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
+    x = tf.keras.layers.Conv2D(128, (3,3), padding='same', activation='relu')(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    x = tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
+    x = tf.keras.layers.Dropout(0.4)(x)
+    x = tf.keras.layers.Dense(32, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
+    x = tf.keras.layers.Dropout(0.4)(x)
     outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
     model = tf.keras.Model(inputs, outputs)
     
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
-        optimizer=tf.keras.optimizers.Adam(lr=0.001),
-        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='acc')])
+        optimizer=tf.keras.optimizers.Adam(lr=0.001/5),
+        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='recallAtPrecision'), 
+        tf.keras.metrics.BinaryAccuracy(threshold=0.6, name='binaryAccuracy')])
 
     return model
 
@@ -219,10 +227,10 @@ model.summary()
 #%%
 
 cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-                                                  save_weights_only=True, monitor='val_acc', verbose=1, 
+                                                  save_weights_only=True, monitor='val_recallAtPrecision', verbose=1, 
                                                   save_best_only=True, mode='max')
 
-model.fit(x=dataset_train, validation_data=dataset_val, epochs=400, 
+model.fit(x=dataset_train, validation_data=dataset_val, epochs=200, 
                                 verbose=1,callbacks = [cp_callback], class_weight = {0: 1 , 1:1.92})
 
 # %%
