@@ -134,7 +134,7 @@ def parse_function(filename, label):
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize(image, [270, 480], method=tf.image.ResizeMethod.AREA, 
                             preserve_aspect_ratio=True)
-    image = tf.image.random_crop(image, size=[270,270,3])
+    #image = tf.image.random_crop(image, size=[270,270,3])
     return image, label
 
 
@@ -185,9 +185,9 @@ tf.keras.backend.set_image_data_format('channels_last')
 def create_model():
 
     inputs = tf.keras.layers.Input([270, 480, 3])
-    x = tf.keras.layers.experimental.preprocessing.Normalization(inputs)
-    #x = tf.keras.layers.BatchNormalization()(inputs)
-    x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(x)
+    #x = tf.keras.layers.experimental.preprocessing.Normalization(inputs)
+    x = tf.keras.layers.BatchNormalization()(inputs)
+    x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(inputs)
     x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.Dropout(0.3)(x)
