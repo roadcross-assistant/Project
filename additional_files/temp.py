@@ -16,7 +16,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.applications import MobileNetV2
 
 # %%
-user = 'siddhi'
+user = 'aws'
 
 if user == 'siddhi':
     path_videos = 'C:/RoadCrossingAssistant/Data/Videos/'
@@ -167,7 +167,7 @@ dataset_train = dataset_train.window(w)
 dataset_train = dataset_train.shuffle(len(filenames_train))
 dataset_train = dataset_train.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(8))
 dataset_train = dataset_train.map(lambda a,b : (a,b[-1]))
-dataset_train = dataset_train.batch(16)
+dataset_train = dataset_train.batch(8)
 dataset_train = dataset_train.prefetch(1)
 
 dataset_test = tf.data.Dataset.from_tensor_slices((filenames_test,labels_test))
@@ -228,9 +228,9 @@ def create_model():
     return model
 
 
-def create_model_lstm(single_model):
+def create_model_lstm():
 
-    shape=(5, 279, 482, 3)
+    shape=(5, 270, 480, 3)
     
     # Create our convnet with (112, 112, 3) input shape
     convnet = create_model()
@@ -255,7 +255,7 @@ def create_model_lstm(single_model):
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=tf.keras.optimizers.Adam(lr=0.001/5),
         metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='recallAtPrecision'), 
-        tf.keras.metrics.BinaryAccuracy(threshold=0.6, name='binaryAccuracy')])
+        tf.keras.metrics.BinaryAccuracy(threshold=0.5, name='binaryAccuracy')])
 
     return lstm_model
 
@@ -286,8 +286,10 @@ print("train loss, trai acc:", results)
 model.load_weights(checkpoint_path)
 print("Evaluate on test data")
 results = model.evaluate(dataset_test)
-print("test loss, test acc:", results)
+print("test loss, rap, rac:", results)
 
 print("Evaluate on train data")
 results = model.evaluate(dataset_train)
-print("train loss, trai acc:", results)
+print("train loss, rap, rac:", results)
+
+
