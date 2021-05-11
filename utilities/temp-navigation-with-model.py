@@ -40,7 +40,7 @@ text_to_speech_engine = pyttsx3.init()
 def load_model_from_path():
 
     model = tf.saved_model.load(
-        "C:/Users/yagnesh.patil/Documents/Personal/RoadCrossingAssistant_Data/Trained Models/training_acc-77%/"
+        "C:/Users/yagnesh.patil/Documents/Personal/RoadCrossingAssistant_Data/Trained Models/training_acc-77%"
     )
     func = model.signatures["serving_default"]
 
@@ -80,15 +80,17 @@ def cross_roads_main_func(video):
 
     no_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-    labels = np.load(
-        "C:/Users/yagnesh.patil/Documents/Personal/RoadCrossingAssistant_Data/Trained Models/temp labels/labels96.npy"
-    )
+    # labels = np.load(
+    #     "C:/Users/yagnesh.patil/Documents/Personal/RoadCrossingAssistant_Data/Trained Models/temp labels/labels96.npy"
+    # )
     frame_count = -1
     safe_frame_count = 0
     unsafe_frame_count = 0
     safe_speak_flag = False
     unsafe_speak_flag = False
     welcome_speak_flag = False
+
+    predict = load_model_from_path()
 
     while cap.isOpened():
         success, frame = cap.read()
@@ -112,18 +114,24 @@ def cross_roads_main_func(video):
 
             # oup = generate_random_label()
 
-            frame = cv2.resize(frame, (1080, 720))
-            oup = labels[frame_count]
+            test_frame = cv2.resize(frame, (480, 270))
+            test_inp = np.array([test_frame])
+            x = tf.convert_to_tensor(test_inp, dtype=tf.float32)
+            output = predict(x)
+
+            frame = cv2.resize(frame, (1366, 760))
+
+            predicted_label = tf.keras.backend.get_value(output["dense_1"])[0]
 
             # assuming that we are getting the predictions per frame
-            if oup == 1:  # safe frame
+            if predicted_label > 0.9:  # safe frame
                 cv2.rectangle(
-                    frame, (1576, 3), (1890, 95), (0, 200, 0), thickness=-1
+                    frame, (1100, 3), (1360, 95), (0, 200, 0), thickness=-1
                 )
                 frame_save = cv2.putText(
                     frame,
                     "SAFE",
-                    (1580, 90),
+                    (1130, 90),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     4,
                     (255, 255, 255),
@@ -142,12 +150,12 @@ def cross_roads_main_func(video):
                     unsafe_speak_flag = False
             else:
                 cv2.rectangle(
-                    frame, (1396, 3), (1890, 95), (0, 0, 200), thickness=-1
+                    frame, (1100, 3), (1360, 95), (0, 200, 200), thickness=-1
                 )
                 frame_save = cv2.putText(
                     frame,
                     "UNSAFE",
-                    (1400, 90),
+                    (1130, 90),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     4,
                     (255, 255, 255),
