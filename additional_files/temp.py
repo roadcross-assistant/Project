@@ -34,15 +34,15 @@ elif user == 'aws':
     path_labels_csv = '/home/ubuntu/Data/labels_framewise_csv.csv'
     path_labels_list = '/home/ubuntu/Data/labels_framewise_list.pkl'
     path_frames = '/home/ubuntu/Data/Frames/'
-    checkpoint_path = "/home/ubuntu/checkpoints/training_temp/cp.ckpt"
+    checkpoint_path = "/home/ubuntu/checkpoints/training_lstm/cp.ckpt"
 
 
 # %%
 #Perform train-test-validation split(66-22-16)
 
 x = np.arange(1, 105)
+np.random.seed(5)
 np.random.shuffle(x)
-#np.random.seed(42)
 videos_validation = x[:16]
 videos_test = x[16: 16+22]
 videos_train = x[16+22: ]
@@ -58,17 +58,23 @@ filenames_validation = []
 labels_validation = []
 filenames_test = []
 labels_test = []
-
+w = 5
 
 for vid in videos_train:
     folder = path_frames + "video{}/".format(vid)
     frames = glob.glob(folder + 'frame*.jpg')
     frames = natsort.natsorted(frames)
+    no_frames = len(frames)
+    no_required = no_frames - (no_frames % w)
+    frames = frames[:no_required]
     filenames_train.extend(frames)
     labels_path = path_frames + "video{}/".format(vid) + "labels{}.npy".format(vid)
     labels_array = np.load(labels_path)
     labels_list = list(labels_array)
+    labels_list = labels_list[:no_required]
     labels_train.extend(labels_list)
+    
+
 
 filenames_train = np.array(filenames_train)
 labels_train = np.array(labels_train)
@@ -77,10 +83,14 @@ for vid in videos_test:
     folder = path_frames + "video{}/".format(vid)
     frames = glob.glob(folder + 'frame*.jpg')
     frames = natsort.natsorted(frames)
+    no_frames = len(frames)
+    no_required = no_frames - (no_frames % w)
+    frames = frames[:no_required]
     filenames_test.extend(frames)
     labels_path = path_frames + "video{}/".format(vid) + "labels{}.npy".format(vid)
     labels_array = np.load(labels_path)
     labels_list = list(labels_array)
+    labels_list = labels_list[:no_required]
     labels_test.extend(labels_list)
 
 filenames_test = np.array(filenames_test)
@@ -90,10 +100,14 @@ for vid in videos_validation:
     folder = path_frames + "video{}/".format(vid)
     frames = glob.glob(folder + 'frame*.jpg')
     frames = natsort.natsorted(frames)
+    no_frames = len(frames)
+    no_required = no_frames - (no_frames % w)
+    frames = frames[:no_required]
     filenames_validation.extend(frames)
     labels_path = path_frames + "video{}/".format(vid) + "labels{}.npy".format(vid)
     labels_array = np.load(labels_path)
     labels_list = list(labels_array)
+    labels_list = labels_list[:no_required]
     labels_validation.extend(labels_list)
 
 filenames_validation = np.array(filenames_validation)
@@ -134,47 +148,46 @@ def parse_function(filename, label):
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize(image, [270, 480], method=tf.image.ResizeMethod.AREA, 
                             preserve_aspect_ratio=True)
-    
+    #image = tf.image.random_crop(image, size=[270,270,3])
     return image, label
 
 
 def train_preprocess(image, label):
 
     image = tf.image.random_brightness(image, 0.15)
+    image = tf.image.random_contrast(image, 0.8, 1.5)
+    image = tf.image.random_saturation(image, 0.6, 3)
 
     return image, label
 
 dataset_train = tf.data.Dataset.from_tensor_slices((filenames_train,labels_train))
-dataset_train = dataset_train.shuffle(len(filenames_train))
 dataset_train = dataset_train.map(parse_function, num_parallel_calls=4)
 dataset_train = dataset_train.map(train_preprocess, num_parallel_calls=4)
-#d = d.window(2)
-#dataset_train = dataset_train.shuffle(len(filenames_train))
-#d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
-#d = d.map(lambda a,b : (a,b[-1]))
-dataset_train = dataset_train.batch(32)
+dataset_train = dataset_train.window(w)
+dataset_train = dataset_train.shuffle(len(filenames_train))
+dataset_train = dataset_train.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(8))
+dataset_train = dataset_train.map(lambda a,b : (a,b[-1]))
+dataset_train = dataset_train.batch(8)
 dataset_train = dataset_train.prefetch(1)
 
 dataset_test = tf.data.Dataset.from_tensor_slices((filenames_test,labels_test))
-dataset_test = dataset_test.shuffle(len(filenames_test))
 dataset_test = dataset_test.map(parse_function, num_parallel_calls=4)
 #dataset_test = dataset_test.map(train_preprocess, num_parallel_calls=4)
-#d = d.window(2)
-#dataset_test = dataset_test.shuffle(len(filenames_test))
-#d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
-#d = d.map(lambda a,b : (a,b[-1]))
-dataset_test = dataset_test.batch(32)
+dataset_test = dataset_test.window(w)
+dataset_test = dataset_test.shuffle(len(filenames_test))
+dataset_test = dataset_test.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(8))
+dataset_test = dataset_test.map(lambda a,b : (a,b[-1]))
+dataset_test = dataset_test.batch(8)
 dataset_test = dataset_test.prefetch(1)
 
 dataset_val = tf.data.Dataset.from_tensor_slices((filenames_validation,labels_validation))
-dataset_val = dataset_val.shuffle(len(filenames_validation))
 dataset_val = dataset_val.map(parse_function, num_parallel_calls=4)
 #dataset_val = dataset_val.map(train_preprocess, num_parallel_calls=4)
-#d = d.window(2)
-#dataset_val = dataset_val.shuffle(len(filenames_validation))
-#d = d.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(2))
-#d = d.map(lambda a,b : (a,b[-1]))
-dataset_val = dataset_val.batch(32)
+dataset_val = dataset_val.window(w)
+dataset_val = dataset_val.shuffle(len(filenames_validation))
+dataset_val = dataset_val.flat_map(lambda a,b:tf.data.Dataset.zip((a,b)).batch(8))
+dataset_val = dataset_val.map(lambda a,b : (a,b[-1]))
+dataset_val = dataset_val.batch(8)
 dataset_val = dataset_val.prefetch(1)
 
 # %%
@@ -183,27 +196,25 @@ tf.keras.backend.set_image_data_format('channels_last')
 def create_model():
 
     inputs = tf.keras.layers.Input([270, 480, 3])
+    #x = tf.keras.layers.experimental.preprocessing.Normalization(inputs)
     x = tf.keras.layers.BatchNormalization()(inputs)
-    x = tf.keras.layers.Conv2D(64, (7,7), padding='same', activation='relu')(x)
+    x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(inputs)
+    x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.Dropout(0.3)(x)
-    x = tf.keras.layers.Conv2D(64, (7,7), padding='same', activation='relu')(x)
-    x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
     x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
-    x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.Dropout(0.3)(x)
     x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
-    #x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
-    x = tf.keras.layers.Conv2D(128  , (3,3), padding='same', activation='relu')(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
+    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
+    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.Conv2D(128  , (5,5), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.Dropout(0.3)(x)
-    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
     x = tf.keras.layers.Conv2D(128, (3,3), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.Conv2D(128, (1,1), padding='same', activation='relu')(x) 
-    x = tf.keras.layers.BatchNormalization()(x)   
     x = tf.keras.layers.GlobalAveragePooling2D()(x)
     x = tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
     x = tf.keras.layers.Dropout(0.4)(x)
@@ -212,15 +223,43 @@ def create_model():
     outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
     model = tf.keras.Model(inputs, outputs)
     
-    model.compile(
-        loss=tf.keras.losses.BinaryCrossentropy(),
-        optimizer=tf.keras.optimizers.Adam(learning_rate = 0.0001),
-        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='recallAtPrecision'), 
-        tf.keras.metrics.BinaryAccuracy(threshold=0.6, name='binaryAccuracy')])
+    
 
     return model
 
-model = create_model()
+
+def create_model_lstm():
+
+    shape=(5, 270, 480, 3)
+    
+    # Create our convnet with (112, 112, 3) input shape
+    convnet = create_model()
+    
+    # then create our final model
+    lstm_model = tf.keras.Sequential()
+    # add the convnet with (5, 112, 112, 3) shape
+    lstm_model.add(tf.keras.layers.TimeDistributed(convnet, input_shape=shape))
+    # here, you can also use GRU or LSTM
+    lstm_model.add(tf.keras.layers.LSTM(64))
+    # and finally, we make a decision network
+    lstm_model.add(tf.keras.layers.Dense(1024, activation='relu'))
+    lstm_model.add(tf.keras.layers.Dropout(.5))
+    lstm_model.add(tf.keras.layers.Dense(512, activation='relu'))
+    lstm_model.add(tf.keras.layers.Dropout(.5))
+    lstm_model.add(tf.keras.layers.Dense(128, activation='relu'))
+    lstm_model.add(tf.keras.layers.Dropout(.5))
+    lstm_model.add(tf.keras.layers.Dense(64, activation='relu'))
+    lstm_model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+
+    lstm_model.compile(
+        loss=tf.keras.losses.BinaryCrossentropy(),
+        optimizer=tf.keras.optimizers.Adam(lr=0.001/5),
+        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='recallAtPrecision'), 
+        tf.keras.metrics.BinaryAccuracy(threshold=0.5, name='binaryAccuracy')])
+
+    return lstm_model
+
+model = create_model_lstm()
 model.summary()
 
 
@@ -230,18 +269,17 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                   save_weights_only=True, monitor='val_recallAtPrecision', verbose=1, 
                                                   save_best_only=True, mode='max')
 
-model.fit(x=dataset_train, validation_data=dataset_val, epochs=250, 
+model.fit(x=dataset_train, validation_data=dataset_val, epochs=200, 
                                 verbose=1,callbacks = [cp_callback], class_weight = {0: 1 , 1:1.92})
 
-
-# %%
+#%%
 print("Evaluate on test data")
 results = model.evaluate(dataset_test)
-print("test loss, rap, rac:", results)
+print("test loss, test acc:", results)
 
 print("Evaluate on train data")
 results = model.evaluate(dataset_train)
-print("train loss, rap, rac:", results)
+print("train loss, trai acc:", results)
 
 
 #%%
@@ -254,21 +292,4 @@ print("Evaluate on train data")
 results = model.evaluate(dataset_train)
 print("train loss, rap, rac:", results)
 
-#%%
-img = cv2.imread("/home/ubuntu/Data/Frames/video30/frame50.jpg")
-#img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-img = cv2.resize(img, (480,270))
-print(img.shape)
-
-test_input = np.array([img])
-print(test_input.shape)
-
-print(model.predict(test_input))
-
-#%%
-
-model.save('/home/ubuntu/savedmodel_training_temp')
-
-loaded = tf.keras.models.load_model('/home/ubuntu/savedmodel_training_temp')
-print(loaded.predict(test_input))
 
