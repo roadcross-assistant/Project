@@ -1,3 +1,4 @@
+#val : 0.77661
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
@@ -263,4 +264,3 @@ print("test loss, test acc:", results)
 print("Evaluate on train data")
 results = model.evaluate(dataset_train)
 print("train loss, trai acc:", results)
-
