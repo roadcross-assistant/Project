@@ -39,13 +39,8 @@ text_to_speech_engine = pyttsx3.init()
 
 def load_model_from_path():
 
-    model = tf.saved_model.load(
-        "C:/Users/yagnesh.patil/Documents/Personal/RoadCrossingAssistant_Data/Trained Models/training_acc-77%"
-    )
-    func = model.signatures["serving_default"]
-
-    return func
-
+    model = tf.keras.models.load_model("C:/Users/Siddhi/Desktop/GCET/Project/savedmodels/training_temp")
+    return model
 
 def speak_command(command_text):
 
@@ -90,13 +85,13 @@ def cross_roads_main_func(video):
     unsafe_speak_flag = False
     welcome_speak_flag = False
 
-    predict = load_model_from_path()
+    model = load_model_from_path()
 
     while cap.isOpened():
         success, frame = cap.read()
         if success:
             if frame_count == -1:
-                frame = cv2.resize(frame, (1080, 720))
+                cv2.namedWindow(video, cv2.WINDOW_NORMAL)
                 while True:
                     key_init = cv2.waitKey(25)
                     cv2.imshow(video, frame)
@@ -116,30 +111,19 @@ def cross_roads_main_func(video):
 
             test_frame = cv2.resize(frame, (480, 270))
             test_inp = np.array([test_frame])
-            x = tf.convert_to_tensor(test_inp, dtype=tf.float32)
-            output = predict(x)
+            #x = tf.convert_to_tensor(test_inp, dtype=tf.float32)
+            output = model.predict(test_inp)
 
-            frame = cv2.resize(frame, (1366, 760))
+            #frame = cv2.resize(frame, cv2.WINDOW_NORMAL)
 
-            predicted_label = tf.keras.backend.get_value(output["dense_1"])[0]
+            predicted_label = output[0][0]
 
             # assuming that we are getting the predictions per frame
-            if predicted_label > 0.9:  # safe frame
-                cv2.rectangle(
-                    frame, (1100, 3), (1360, 95), (0, 200, 0), thickness=-1
-                )
-                frame_save = cv2.putText(
-                    frame,
-                    "SAFE",
-                    (1130, 90),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    4,
-                    (255, 255, 255),
-                    6,
-                    cv2.LINE_AA,
-                )
+            if predicted_label > 0.8:  # safe frame
+                cv2.rectangle(frame, (1576,3), (1890,95), (0,200,0), thickness=-1)
+                frame_save = cv2.putText(frame, 'SAFE', (1580,90), cv2.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 6, cv2.LINE_AA)
                 cv2.imshow(video, frame_save)
-                cv2.waitKey(34)
+                cv2.waitKey(15)
 
                 unsafe_frame_count = 0
                 safe_frame_count = safe_frame_count + 1
@@ -149,21 +133,10 @@ def cross_roads_main_func(video):
                     safe_speak_flag = True
                     unsafe_speak_flag = False
             else:
-                cv2.rectangle(
-                    frame, (1100, 3), (1360, 95), (0, 200, 200), thickness=-1
-                )
-                frame_save = cv2.putText(
-                    frame,
-                    "UNSAFE",
-                    (1130, 90),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    4,
-                    (255, 255, 255),
-                    6,
-                    cv2.LINE_AA,
-                )
+                cv2.rectangle(frame, (1396,3), (1890,95), (0,0,200), thickness=-1)
+                frame_save = cv2.putText(frame, 'UNSAFE', (1400,90), cv2.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 6, cv2.LINE_AA)
                 cv2.imshow(video, frame_save)
-                cv2.waitKey(34)
+                cv2.waitKey(15)
 
                 safe_frame_count = 0
                 unsafe_frame_count = unsafe_frame_count + 1
@@ -186,5 +159,5 @@ if __name__ == "__main__":
 
     initialize_commands()
     cross_roads_main_func(
-        "C:/Users/yagnesh.patil/Documents/Personal/RoadCrossingAssistant_Data/Videos/video96.MOV"
+        "C:/RoadCrossingAssistant/Data/Videos/video96.MOV"
     )
