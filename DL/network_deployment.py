@@ -135,7 +135,7 @@ def parse_function(filename, label):
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize(image, [270, 480], method=tf.image.ResizeMethod.AREA, 
                             preserve_aspect_ratio=True)
-    image = image / 255.0
+    #image = image / 255.0
     return image, label
 
 
@@ -177,16 +177,19 @@ def create_model():
     #x = tf.keras.layers.experimental.preprocessing.Normalization(inputs)
     #x = tf.keras.layers.BatchNormalization()(inputs)
     x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(inputs)
+    x = tf.keras.layers.Dropout(0.2)(x)
     x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.Dropout(0.3)(x)
     x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
     x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.Dropout(0.2)(x)
     x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.Dropout(0.3)(x)
     x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
     x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.Dropout(0.2)(x)
     x = tf.keras.layers.Conv2D(128  , (5,5), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.Dropout(0.3)(x)
