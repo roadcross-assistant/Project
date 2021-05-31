@@ -16,9 +16,6 @@ def load_model_from_path():
 
 model = load_model_from_path()
 
-def predict(t):
-    o = model.predict(t)
-    return o
 
 def speak_command(command_text):
 
@@ -71,9 +68,10 @@ def cross_roads_main_func(video):
     while cap.isOpened():
         success, frame = cap.read()
         print(success, frame_count)
+        cv2.namedWindow(video, cv2.WINDOW_NORMAL)
         if success:
             if frame_count == -1:
-                cv2.namedWindow(video, cv2.WINDOW_NORMAL)
+                
                 while True:
                     key_init = cv2.waitKey(25)
                     cv2.imshow(video, frame)
@@ -90,12 +88,14 @@ def cross_roads_main_func(video):
             # oup = loaded_model.predict(inp)[0][0]
 
             # oup = generate_random_label()
+            image = tf.image.convert_image_dtype(frame, tf.float32)
+            image = tf.image.resize(image, [270, 480], method=tf.image.ResizeMethod.AREA, 
+                            preserve_aspect_ratio=True)
+            print(image.shape)
+            image = np.expand_dims(image, axis = 0)
 
-            test_frame = cv2.resize(frame, (480, 270))
-            test_inp = np.array([test_frame])
-            #x = tf.convert_to_tensor(test_inp, dtype=tf.float32)
-            output = model.predict(test_inp)
-            print("frame ", frame_count, "-----> ", predict(test_inp))
+            output = model.predict(image)
+            print("frame ", frame_count, "-----> ", output)
             #print(frame_count, generate_random_label())
 
             # if frame_count == 20:
@@ -108,7 +108,7 @@ def cross_roads_main_func(video):
             predicted_label = output[0][0]
 
             #assuming that we are getting the predictions per frame
-            if predicted_label > 0.8:  # safe frame
+            if predicted_label > 0.6:  # safe frame
                 cv2.rectangle(frame, (1576,3), (1890,95), (0,200,0), thickness=-1)
                 frame_save = cv2.putText(frame, 'SAFE', (1580,90), cv2.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 6, cv2.LINE_AA)
                 cv2.imshow(video, frame_save)
@@ -140,7 +140,7 @@ def cross_roads_main_func(video):
             break
         # print(labels)
     cap.release()
-    #cv2.destroyAllWindows()
+    cv2.destroyAllWindows()
     # speak_command(CLOSING_COMMAND)
     speak_command(CLOSING_COMMAND)
 
@@ -152,5 +152,5 @@ if __name__ == "__main__":
 
     initialize_commands()
     cross_roads_main_func(
-        "C:/RoadCrossingAssistant/Data/Videos/video96.MOV"
+        "C:/RoadCrossingAssistant/Data/Videos/video10.MOV"
     )
