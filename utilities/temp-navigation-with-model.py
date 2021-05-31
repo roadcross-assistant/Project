@@ -4,43 +4,21 @@ import pyttsx3
 import random
 import numpy as np
 import tensorflow as tf
-
-""" For Camera Input
-def gstreamer_pipeline(
-    capture_width=1280,
-    capture_height=720,
-    display_width=1280,
-    display_height=720,
-    framerate=60,
-    flip_method=0,
-):
-    return (
-        "nvarguscamerasrc ! "
-        "video/x-raw(memory:NVMM), "
-        "width=(int)%d, height=(int)%d, "
-        "format=(string)NV12, framerate=(fraction)%d/1 ! "
-        "nvvidconv flip-method=%d ! "
-        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
-        "videoconvert ! "
-        "video/x-raw, format=(string)BGR ! appsink"
-        % (
-            capture_width,
-            capture_height,
-            framerate,
-            flip_method,
-            display_width,
-            display_height,
-        )
-    )
-"""
+import time
 
 text_to_speech_engine = pyttsx3.init()
 
 
 def load_model_from_path():
 
-    model = tf.keras.models.load_model("C:/Users/Siddhi/Desktop/GCET/Project/savedmodels/training_temp")
+    model = tf.keras.models.load_model("C:/Users/Siddhi/Desktop/GCET/Project/savedmodels/training_deploy")
     return model
+
+model = load_model_from_path()
+
+def predict(t):
+    o = model.predict(t)
+    return o
 
 def speak_command(command_text):
 
@@ -62,6 +40,7 @@ def initialize_commands():
 
 
 def generate_random_label():
+    time.sleep(1)
     return random.randint(0, 1)
 
 
@@ -69,11 +48,11 @@ def cross_roads_main_func(video):
 
     # loaded_model = load_model_from_path()
     cap = cv2.VideoCapture(video)  # static video input
-
+   
     # for camera input
-    # cap = cv2.VideoCapture(gstreamer_pipline(flip_method=0), cv2.CAP_GSTREAMER)
+    #cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
 
-    no_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    #no_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     # labels = np.load(
     #     "C:/Users/yagnesh.patil/Documents/Personal/RoadCrossingAssistant_Data/Trained Models/temp labels/labels96.npy"
@@ -85,10 +64,13 @@ def cross_roads_main_func(video):
     unsafe_speak_flag = False
     welcome_speak_flag = False
 
-    model = load_model_from_path()
+    #model = load_model_from_path()
+
+    #start = time.time()
 
     while cap.isOpened():
         success, frame = cap.read()
+        print(success, frame_count)
         if success:
             if frame_count == -1:
                 cv2.namedWindow(video, cv2.WINDOW_NORMAL)
@@ -113,12 +95,19 @@ def cross_roads_main_func(video):
             test_inp = np.array([test_frame])
             #x = tf.convert_to_tensor(test_inp, dtype=tf.float32)
             output = model.predict(test_inp)
+            print("frame ", frame_count, "-----> ", predict(test_inp))
+            #print(frame_count, generate_random_label())
+
+            # if frame_count == 20:
+            #     end= time.time()
+
+            #     break
 
             #frame = cv2.resize(frame, cv2.WINDOW_NORMAL)
 
             predicted_label = output[0][0]
 
-            # assuming that we are getting the predictions per frame
+            #assuming that we are getting the predictions per frame
             if predicted_label > 0.8:  # safe frame
                 cv2.rectangle(frame, (1576,3), (1890,95), (0,200,0), thickness=-1)
                 frame_save = cv2.putText(frame, 'SAFE', (1580,90), cv2.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 6, cv2.LINE_AA)
@@ -147,12 +136,16 @@ def cross_roads_main_func(video):
                     safe_speak_flag = False
 
         else:
-            speak_command(CLOSING_COMMAND)
+            
             break
         # print(labels)
     cap.release()
-    cv2.destroyAllWindows()
+    #cv2.destroyAllWindows()
     # speak_command(CLOSING_COMMAND)
+    speak_command(CLOSING_COMMAND)
+
+    #print(f"Runtime of the program is {end - start}")
+
 
 
 if __name__ == "__main__":
