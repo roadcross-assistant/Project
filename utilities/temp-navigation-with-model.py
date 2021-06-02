@@ -94,8 +94,10 @@ def cross_roads_main_func(video):
             print(image.shape)
             image = np.expand_dims(image, axis = 0)
 
+            start = time.time()
             output = model.predict(image)
-            print("frame ", frame_count, "-----> ", output)
+            end = time.time()
+            print("frame ", frame_count, "-----> ", output, "time: ", end - start)
             #print(frame_count, generate_random_label())
 
             # if frame_count == 20:
