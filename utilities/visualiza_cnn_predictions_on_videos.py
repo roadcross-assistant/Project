@@ -31,16 +31,6 @@ def speak_command(command_text):
     text_to_speech_engine.runAndWait()
 
 
-# def initialize_commands():
-#     global WELCOME_COMMAND
-#     WELCOME_COMMAND = "Welcome to Roadcrossing Assistant!"
-#     global SAFE_COMMAND
-#     SAFE_COMMAND = "GO!!"
-#     global UNSAFE_COMMAND
-#     UNSAFE_COMMAND = "STOP!!"
-#     global CLOSING_COMMAND
-#     CLOSING_COMMAND = "Thanks for using RoadCrossing Assistant."
-
 def cross_roads_main_func(video):
 
     cap = cv2.VideoCapture(video)  # static video input
@@ -111,7 +101,7 @@ def cross_roads_main_func(video):
                 unsafe_frame_count = 0
                 safe_frame_count = safe_frame_count + 1
 
-                if safe_frame_count > 3 and not safe_speak_flag:
+                if safe_frame_count > 5 and not safe_speak_flag:
                     speak_command(SAFE_COMMAND)
                     safe_speak_flag = True
                     unsafe_speak_flag = False
@@ -126,7 +116,7 @@ def cross_roads_main_func(video):
                 safe_frame_count = 0
                 unsafe_frame_count = unsafe_frame_count + 1
 
-                if unsafe_frame_count > 2 and not unsafe_speak_flag:
+                if unsafe_frame_count > 3 and not unsafe_speak_flag:
                     speak_command(UNSAFE_COMMAND)
                     unsafe_speak_flag = True
                     safe_speak_flag = False
@@ -157,5 +147,5 @@ def cross_roads_main_func(video):
 if __name__ == "__main__":
 
     cross_roads_main_func(
-        "C:/RoadCrossingAssistant/Data/Videos/video19.MOV"
+        "C:/RoadCrossingAssistant/Data/Videos/video60.MOV"
     )
