@@ -6,6 +6,12 @@ import numpy as np
 import tensorflow as tf
 import time
 
+import logging
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'  # FATAL
+logging.getLogger('tensorflow').setLevel(logging.FATAL)
+
 text_to_speech_engine = pyttsx3.init()
 
 global WELCOME_COMMAND
