@@ -168,46 +168,52 @@ dataset_val = dataset_val.prefetch(1)
 # %%
 tf.keras.backend.set_image_data_format('channels_last')
 
-def create_model():
+base_model = tf.keras.applications.MobileNetV2(
+    input_shape=(270, 480, 3),
+    include_top=False,
+)
 
-    inputs = tf.keras.layers.Input([270, 480, 3])
-    inputs_preprocessed = tf.keras.applications.mobilenet_v2.preprocess_input(inputs)
+# Freeze the base_model
+base_model.trainable = False
 
+inputs = tf.keras.layers.Input([270, 480, 3])
+inputs_preprocessed = tf.keras.applications.mobilenet_v2.preprocess_input(inputs)
 
-    base_model = MobileNetV2(include_top = False)(inputs_preprocessed)
-    
-    x = tf.keras.layers.GlobalAveragePooling2D()(base_model)
-    #x = tf.keras.layers.Flatten()(base_model.output)
-    #x = tf.keras.layers.Dense(1024, activation='relu')(x)
-    x = tf.keras.layers.Dense(64, activation=None, kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
-    x = tf.keras.layers.ReLU(6.)(x)
-    x = tf.keras.layers.Dropout(0.4)(x)
-    x = tf.keras.layers.Dense(32, activation=None, kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
-    x = tf.keras.layers.ReLU(6.)(x)
-    x = tf.keras.layers.Dropout(0.4)(x)
-    outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+x = base_model(inputs_preprocessed, training=False)
+x = tf.keras.layers.GlobalAveragePooling2D()(x)
+x = tf.keras.layers.Dropout(0.4)(x)  # Regularize with dropout
+outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+model = tf.keras.Model(inputs, outputs)
 
-    model = tf.keras.models.Model(inputs, outputs)
-    
-    return model
-
-model = create_model()
 model.summary()
 
 model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
-        optimizer=tf.keras.optimizers.Adam(lr=0.001/5),
+        optimizer=tf.keras.optimizers.Adam(),
         metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='recallAtPrecision'), 
         tf.keras.metrics.BinaryAccuracy(threshold=0.6, name='binaryAccuracy')])
 
-#%%
+model.fit(x=dataset_train, validation_data=dataset_val, epochs=30, 
+                                verbose=1,  class_weight = {0: 1 , 1:2})
+
+print("now onto 2nd part \n\n\n\n\n\n\n\n\n")
+
+base_model.trainable = True
+model.summary()
 
 cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-                                                  save_weights_only=True, monitor='val_recallAtPrecision', verbose=1, 
-                                                  save_best_only=True, mode='max')
+                                                 save_weights_only=True, monitor='val_recallAtPrecision', verbose=1, 
+                                                 save_best_only=True, mode='max')
+model.compile(
+        loss=tf.keras.losses.BinaryCrossentropy(),
+        optimizer=tf.keras.optimizers.Adam(1e-5),
+        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='recallAtPrecision'), 
+        tf.keras.metrics.BinaryAccuracy(threshold=0.6, name='binaryAccuracy')])
 
 model.fit(x=dataset_train, validation_data=dataset_val, epochs=100, 
-                                verbose=1,callbacks = [cp_callback], class_weight = {0: 1 , 1:1.92})
+                                verbose=1, callbacks = [cp_callback] ,class_weight = {0: 1 , 1:2})
+
+
 
 
 # %%
