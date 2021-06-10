@@ -9,4 +9,7 @@
 #ignore pickle files
 *.pkl
 
+#ignore video files
+*.mp4
+
 __pycache__/*
