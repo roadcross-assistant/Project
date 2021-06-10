@@ -34,15 +34,15 @@ elif user == 'aws':
     path_labels_csv = '/home/ubuntu/Data/labels_framewise_csv.csv'
     path_labels_list = '/home/ubuntu/Data/labels_framewise_list.pkl'
     path_frames = '/home/ubuntu/Data/Frames/'
-    checkpoint_path = "/home/ubuntu/checkpoints/training_siddhi1/cp.ckpt"
+    checkpoint_path = "/home/ubuntu/checkpoints/training_4/cp.ckpt"
 
 
 # %%
 #Perform train-test-validation split(66-22-16)
 
 x = np.arange(1, 105)
-np.random.seed(5)
 np.random.shuffle(x)
+#np.random.seed(42)
 videos_validation = x[:16]
 videos_test = x[16: 16+22]
 videos_train = x[16+22: ]
@@ -134,16 +134,13 @@ def parse_function(filename, label):
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize(image, [270, 480], method=tf.image.ResizeMethod.AREA, 
                             preserve_aspect_ratio=True)
-    #image = tf.image.per_image_standardization(image)
-    #image = tf.image.random_crop(image, size=[270,270,3])
+    
     return image, label
 
 
 def train_preprocess(image, label):
 
     image = tf.image.random_brightness(image, 0.15)
-    image = tf.image.random_contrast(image, 0.8, 1.5)
-    image = tf.image.random_saturation(image, 0.6, 3)
 
     return image, label
 
@@ -186,44 +183,28 @@ tf.keras.backend.set_image_data_format('channels_last')
 def create_model():
 
     inputs = tf.keras.layers.Input([270, 480, 3])
-    #x = tf.keras.layers.experimental.preprocessing.Normalization(inputs)
-    x = tf.keras.layers.BatchNormalization()(inputs)
-    x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(inputs)
-    x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(x)
-    x = tf.keras.layers.BatchNormalization()(x)
-    #x = tf.keras.layers.Dropout(0.3)(x)
-    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
+    inputs_preprocessed = tf.keras.applications.mobilenet_v2.preprocess_input(inputs)
 
-    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
-    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-2))(x)
-    x = tf.keras.layers.BatchNormalization()(x)
-    #x = tf.keras.layers.Dropout(0.3)(x)
-    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
 
-    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
-    x = tf.keras.layers.Conv2D(128  , (3,3), padding='same', activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-2))(x)
-    x = tf.keras.layers.BatchNormalization()(x)
-    #x = tf.keras.layers.Dropout(0.3)(x)
-    x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
+    base_model = MobileNetV2(include_top = False, weights = 'imagenet')(inputs_preprocessed, training =False)
+    # for layer in base_model.layers:
+    #     layer.trainable = False
+    x = tf.keras.layers.GlobalAveragePooling2D()(base_model)
+    #x = tf.keras.layers.Flatten()(base_model.output)
+    #x = tf.keras.layers.Dense(1024, activation='relu')(x)
+    x = tf.keras.layers.Dense(512, activation='relu')(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
+    x = tf.keras.layers.Dense(256, activation='relu')(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
+    x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
 
-    x = tf.keras.layers.Conv2D(128, (3,3), padding='same', activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-2))(x)
-    x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    base_learning_rate = 0.0001
 
-    x = tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
-    x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.Dropout(0.4)(x)
-    x = tf.keras.layers.Dense(32, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
-    x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.Dropout(0.4)(x)
-    outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
-    model = tf.keras.Model(inputs, outputs)
-    
+    model = tf.keras.models.Model(base_model.input, x)
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
-        optimizer=tf.keras.optimizers.Adam(lr=0.001/5),
-        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='recallAtPrecision'), 
-        tf.keras.metrics.BinaryAccuracy(threshold=0.6, name='binaryAccuracy')])
+        optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate/5),
+        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='acc')])
 
     return model
 
@@ -233,13 +214,63 @@ model.summary()
 
 #%%
 
+base_model = tf.keras.applications.MobileNetV2(
+    input_shape=(270, 480, 3),
+    include_top=False,
+)
+
+# Freeze the base_model
+base_model.trainable = False
+
+inputs = tf.keras.layers.Input([270, 480, 3])
+inputs_preprocessed = tf.keras.applications.mobilenet_v2.preprocess_input(inputs)
+
+x = base_model(inputs_preprocessed, training=False)
+x = tf.keras.layers.GlobalAveragePooling2D()(x)
+x = tf.keras.layers.Dropout(0.4)(x)  # Regularize with dropout
+outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+model = tf.keras.Model(inputs, outputs)
+
+model.summary()
+
+model.compile(
+        loss=tf.keras.losses.BinaryCrossentropy(),
+        optimizer=tf.keras.optimizers.Adam(),
+        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='acc')])
+
+model.fit(x=dataset_train, validation_data=dataset_val, epochs=30, 
+                                verbose=1,  class_weight = {0: 1 , 1:2})
+
+#%%
+
+print("now onto 2nd part \n\n\n\n\n\n\n\n\n")
+
+base_model.trainable = True
+model.summary()
+checkpoint_dir = os.path.dirname(checkpoint_path)
 cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-                                                  save_weights_only=True, monitor='val_recallAtPrecision', verbose=1, 
-                                                  save_best_only=True, mode='max')
+                                                 save_weights_only=True, monitor='val_acc', verbose=1, 
+                                                 save_best_only=True, mode='max')
+model.compile(
+        loss=tf.keras.losses.BinaryCrossentropy(),
+        optimizer=tf.keras.optimizers.Adam(1e-5),
+        metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='acc')])
 
-model.fit(x=dataset_train, validation_data=dataset_val, epochs=200, 
-                                verbose=1,callbacks = [cp_callback], class_weight = {0: 1 , 1:1.92})
+model.fit(x=dataset_train, validation_data=dataset_val, epochs=100, 
+                                verbose=1, callbacks = [cp_callback] ,class_weight = {0: 1 , 1:2})
 
+# %%
+# #history = model.fit_generator(train_generator, shuffle='true', epochs=1, verbose=1, batch_size=16)
+# #checkpoint_path = "/home/ubuntu/checkpoints/training_3/cp.ckpt"
+# checkpoint_dir = os.path.dirname(checkpoint_path)
+
+# # Create a callback that saves the model's weights
+# cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+#                                                  save_weights_only=True, monitor='val_acc', verbose=1, 
+#                                                  save_best_only=True, mode='max')
+
+# history = model.fit(x=dataset_train, validation_data=dataset_val, epochs=200, 
+#                                 verbose=1, callbacks = [cp_callback], class_weight = {0: 1 , 1:2})
 
 # %%
 print("Evaluate on test data")
@@ -250,8 +281,16 @@ print("Evaluate on train data")
 results = model.evaluate(dataset_train)
 print("train loss, trai acc:", results)
 
+# Generate predictions (probabilities -- the output of the last layer)
+# on new data using `predict`
+# print("Generate predictions")
+# predictions = model.predict(frames_test)
+# print("predictions shape:", predictions.shape)
+# print(predictions[:10])
 
-#%%
+
+
+# %%
 model.load_weights(checkpoint_path)
 print("Evaluate on test data")
 results = model.evaluate(dataset_test)
@@ -260,4 +299,3 @@ print("test loss, test acc:", results)
 print("Evaluate on train data")
 results = model.evaluate(dataset_train)
 print("train loss, trai acc:", results)
-

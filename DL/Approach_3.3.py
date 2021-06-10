@@ -1,4 +1,4 @@
-#val : 0.70762
+#val : 0.
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
@@ -35,7 +35,7 @@ elif user == 'aws':
     path_labels_csv = '/home/ubuntu/Data/labels_framewise_csv.csv'
     path_labels_list = '/home/ubuntu/Data/labels_framewise_list.pkl'
     path_frames = '/home/ubuntu/Data/Frames/'
-    checkpoint_path = "/home/ubuntu/checkpoints/training_deploy/cp.ckpt"
+    checkpoint_path = "/home/ubuntu/checkpoints/approach_3.3/cp.ckpt"
 
 
 # %%
@@ -106,24 +106,24 @@ print(labels_train.shape, labels_validation.shape, labels_test.shape)
 
 #%%
 
-ind0 = np.where(labels_train==0)[0]
-ind1 = np.where(labels_train==1)[0]
-random.shuffle(ind0)
-random.shuffle(ind1)
+# ind0 = np.where(labels_train==0)[0]
+# ind1 = np.where(labels_train==1)[0]
+# random.shuffle(ind0)
+# random.shuffle(ind1)
 
-if (ind0.shape[0]/ind1.shape[0] > 1.4):
-    print('reducing the number of unsafe frames in dataframe\n\n')
-    len_ind0 = int(ind1.shape[0]*1.4)
-    ind0 = ind0[:len_ind0]
+# if (ind0.shape[0]/ind1.shape[0] > 1.4):
+#     print('reducing the number of unsafe frames in dataframe\n\n')
+#     len_ind0 = int(ind1.shape[0]*1.4)
+#     ind0 = ind0[:len_ind0]
 
-    indices_required = np.concatenate((ind0, ind1))
+#     indices_required = np.concatenate((ind0, ind1))
 
-filenames_train_reduced = filenames_train[indices_required]
-labels_train_reduced = labels_train[indices_required]
+# filenames_train_reduced = filenames_train[indices_required]
+# labels_train_reduced = labels_train[indices_required]
 
-print(filenames_train_reduced.shape, labels_train_reduced.shape)
+# print(filenames_train_reduced.shape, labels_train_reduced.shape)
 
-print(ind0.shape, ind1.shape)
+# print(ind0.shape, ind1.shape)
 
 
 # %%
@@ -225,17 +225,12 @@ def create_model():
 
 model = create_model()
 model.summary()
-model = create_model()
 
 model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=tf.keras.optimizers.Adam(lr=0.001/5),
         metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='recallAtPrecision'), 
         tf.keras.metrics.BinaryAccuracy(threshold=0.6, name='binaryAccuracy')])
-
-model.summary()
-
-
 
 
 #%%
