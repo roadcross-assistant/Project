@@ -146,55 +146,36 @@ tf.keras.backend.set_image_data_format('channels_last')
 def create_model():
 
     inputs = tf.keras.layers.Input([270, 480, 3])
-    #x = tf.keras.layers.BatchNormalization()(inputs)
+    x = tf.keras.layers.BatchNormalization()(inputs)
 
-    x = tf.keras.layers.Conv2D(32, (3,3), padding='same', activation=None, dilation_rate = (3,3),
-    use_bias=False)(inputs)
-    #x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.ReLU(6.)(x)
-    x = tf.keras.layers.Conv2D(32, (3,3), padding='same', activation=None, dilation_rate = (3,3),
-    use_bias=False)(x)
+    x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(inputs)
+    x = tf.keras.layers.Conv2D(32, (7,7), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.ReLU(6.)(x)
     x = tf.keras.layers.Dropout(0.3)(x)
     x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
 
-    x = tf.keras.layers.Conv2D(64, (3,3), padding='same', activation=None, dilation_rate = (2,2),
-    use_bias=False)(x)
-    #x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.ReLU(6.)(x)
-    x = tf.keras.layers.Conv2D(64, (3,3), padding='same', activation=None, dilation_rate = (2,2),
-    use_bias=False)(x)
+    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.ReLU(6.)(x)
     x = tf.keras.layers.Dropout(0.3)(x)
     x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
 
-    x = tf.keras.layers.Conv2D(64, (3,3), padding='same', activation=None, dilation_rate = (2,2),
-    use_bias=False)(x)
-    #x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.ReLU(6.)(x)
-    x = tf.keras.layers.Conv2D(128 , (3,3), padding='same', activation=None, dilation_rate = (2,2),
-    use_bias=False)(x)
+    x = tf.keras.layers.Conv2D(64, (5,5), padding='same', activation='relu')(x)
+    x = tf.keras.layers.Conv2D(128  , (5,5), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.ReLU(6.)(x)
     x = tf.keras.layers.Dropout(0.3)(x)
     x = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x)
 
-    x = tf.keras.layers.Conv2D(128, (3,3), padding='same', activation=None, use_bias=False)(x)
+    x = tf.keras.layers.Conv2D(128, (3,3), padding='same', activation='relu')(x)
     x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.ReLU(6.)(x)
     x = tf.keras.layers.GlobalAveragePooling2D()(x)
 
-    x = tf.keras.layers.Dense(64, activation=None, kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
-    x = tf.keras.layers.ReLU(6.)(x)
+    x = tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
     x = tf.keras.layers.Dropout(0.4)(x)
-    x = tf.keras.layers.Dense(32, activation=None, kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
-    x = tf.keras.layers.ReLU(6.)(x)
+    x = tf.keras.layers.Dense(32, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
     x = tf.keras.layers.Dropout(0.4)(x)
     outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
     model = tf.keras.Model(inputs, outputs)
-
 
     return model
 
@@ -209,7 +190,7 @@ model.compile(
 
 model.summary()
 
-model.load_weights("/home/ubuntu/checkpoints/training_deploy/cp.ckpt")
+model.load_weights("/home/ubuntu/checkpoints/approach_3.2/cp.ckpt")
 
 # %%
 print("Evaluate on test data")
@@ -239,11 +220,11 @@ print("val loss, val acc:", results)
 
 # %%
 
-model.save('/home/ubuntu/savedmodels/training_deploy')
+# model.save('/home/ubuntu/savedmodels/training_deploy')
 
-loaded = tf.keras.models.load_model('/home/ubuntu/savedmodels/training_deploy')
-print("saved model")
-#print(loaded.predict(test_input))
+# loaded = tf.keras.models.load_model('/home/ubuntu/savedmodels/training_deploy')
+# print("saved model")
+# #print(loaded.predict(test_input))
 
 #%%
 # from tensorflow.python.compiler.tensorrt import trt_convert as trt
