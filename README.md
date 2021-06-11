@@ -62,7 +62,7 @@ It is similar to Approach 2.1, in which we have used multi-frame features in a s
 
 #### [**Approach 3.1 (precision : 0.90 , recall : 0.43)** ![Approach 3.1](https://img.icons8.com/fluent-systems-filled/18/0366D6/external-link.png)](https://github.com/roadcross-assistant/Project/blob/master/DL/Approach_3.1.py)
 
-In Approach 3.1, we used the MobileNetV2 architecture with additional dense layers at the top. We used the MobileNetV2 because it is a lightweight architecture particularly useful for mobile and embedded vision applications..
+In Approach 3.1, we used the MobileNetV2 architecture with additional dense layers at the top. We used the MobileNetV2 because it is a lightweight architecture particularly useful for mobile and embedded vision applications.
 
 #### [**Approach 3.2 (precision : 0.90 , recall : 0.73)** ![Approach 3.2](https://img.icons8.com/fluent-systems-filled/18/0366D6/external-link.png)](https://github.com/roadcross-assistant/Project/blob/master/DL/Approach_3.2.py)
 
@@ -70,7 +70,7 @@ As Approach 3.1 did not give a satisfactory performance on test data, in Approac
 
 #### [**Approach 3.3 (precision : 0.90 , recall : 0.77)** ![Approach 3.3](https://img.icons8.com/fluent-systems-filled/18/0366D6/external-link.png)](https://github.com/roadcross-assistant/Project/blob/master/DL/Approach_3.3.py)
 
-It is an advancement over approach 3.2, in which we have replaced the convolutional layers with larger kernal size with dilated convolutional layers. This resulted in a higher inference speed after optimization to TensorRT graph.S
+It is an advancement over approach 3.2, in which we have replaced the convolutional layers with larger kernal size with dilated convolutional layers. This resulted in a higher inference speed after optimization to TensorRT graph.
 
 &nbsp;
 
