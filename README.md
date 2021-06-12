@@ -35,7 +35,7 @@ Any suitable dataset did not exist (datasets for autonomous cars are not recorde
 
 It is our simplest approach where we extracted simple per-frame features capturing number, location and size of vehicles. We used SVM to train the classification model. 
 
-#### [**Approach 1.2 (precision : 0.60 , recall : 0.74)** ![Approach 1.2](https://img.icons8.com/fluent-systems-filled/18/0366D6/external-link.png)](https://github.com/roadcross-assistant/Project/blob/master/ML/Approach_1.2_individual_frames.ipynb)
+#### [**Approach 1.2 (precision : 0.54 , recall : 0.74)** ![Approach 1.2](https://img.icons8.com/fluent-systems-filled/18/0366D6/external-link.png)](https://github.com/roadcross-assistant/Project/blob/master/ML/Approach_1.2_individual_frames.ipynb)
 
 It is an advancement over Approach 1.1 where we have improved our feature extraction logic by ignoring the vehicles traveling on the opposite half of the road (using vehicle tracking)
 
