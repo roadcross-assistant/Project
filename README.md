@@ -74,7 +74,7 @@ It is an advancement over approach 3.2, in which we have replaced the convolutio
 
 &nbsp;
 
-Note : The precision and recall mentioned are the model performances on test data.
+Note : The precision and recall mentioned are model performances on test data.
 
 *To know more about feature extraction, model training and implementation details, visit our [website ![website-link](https://img.icons8.com/fluent-systems-filled/15/0366D6/external-link.png)](https://roadcross-assistant.github.io/Website/ "Road Crossing Assistant Website").*
 
