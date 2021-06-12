@@ -60,7 +60,7 @@ It is similar to Approach 2.1, in which we have used multi-frame features in a s
 ### 3. Deep Learning - Single frame CNN
 
 
-#### [**Approach 3.1 (precision : 0.90 , recall : 0.43)** ![Approach 3.1](https://img.icons8.com/fluent-systems-filled/18/0366D6/external-link.png)](https://github.com/roadcross-assistant/Project/blob/master/DL/Approach_3.1.py)
+#### [**Approach 3.1 (precision : 0.90 , recall : 0.60)** ![Approach 3.1](https://img.icons8.com/fluent-systems-filled/18/0366D6/external-link.png)](https://github.com/roadcross-assistant/Project/blob/master/DL/Approach_3.1.py)
 
 In Approach 3.1, we used the MobileNetV2 architecture with additional dense layers at the top. We used the MobileNetV2 because it is a lightweight architecture particularly useful for mobile and embedded vision applications.
 
