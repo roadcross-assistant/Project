@@ -220,7 +220,7 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                   save_weights_only=True, monitor='val_recallAtPrecision', verbose=1, 
                                                   save_best_only=True, mode='max')
 
-model.fit(x=dataset_train, validation_data=dataset_val, epochs=200, 
+model.fit(x=dataset_train, validation_data=dataset_val, epochs=150, 
                                 verbose=1,callbacks = [cp_callback], class_weight = {0: 1 , 1:1.92})
 
 

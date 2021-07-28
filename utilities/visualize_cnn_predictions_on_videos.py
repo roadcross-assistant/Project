@@ -122,7 +122,7 @@ def cross_roads_main_func(video):
                 safe_frame_count = 0
                 unsafe_frame_count = unsafe_frame_count + 1
 
-                if unsafe_frame_count > 3 and not unsafe_speak_flag:
+                if  not unsafe_speak_flag:
                     speak_command(UNSAFE_COMMAND)
                     unsafe_speak_flag = True
                     safe_speak_flag = False
@@ -130,11 +130,11 @@ def cross_roads_main_func(video):
 
             if safe_speak_flag:
                     cv2.rectangle(frame, (1576,3), (1890,95), (0,200,0), thickness=-1)
-                    frame_save = cv2.putText(frame, 'GO!!', (1580,90), cv2.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 6, cv2.LINE_AA)
+                    frame_save = cv2.putText(frame, 'GO!', (1580,90), cv2.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 6, cv2.LINE_AA)
 
             if unsafe_speak_flag:
                     cv2.rectangle(frame, (1396,3), (1890,95), (0,0,200), thickness=-1)
-                    frame_save = cv2.putText(frame, 'WAIT', (1400,90), cv2.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 6, cv2.LINE_AA)
+                    frame_save = cv2.putText(frame, 'STOP!', (1400,90), cv2.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 6, cv2.LINE_AA)
 
             result.write(frame_save)
             cv2.imshow(video, frame_save)
@@ -153,5 +153,5 @@ def cross_roads_main_func(video):
 if __name__ == "__main__":
 
     cross_roads_main_func(
-        "C:/RoadCrossingAssistant/Data/Videos/video60.MOV"
+        "C:/RoadCrossingAssistant/Data/Videos/video104.MOV"
     )

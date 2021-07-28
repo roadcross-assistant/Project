@@ -193,7 +193,7 @@ model.compile(
         tf.keras.metrics.BinaryAccuracy(threshold=0.6, name='binaryAccuracy')])
 
 model.fit(x=dataset_train, validation_data=dataset_val, epochs=30, 
-                                verbose=1,  class_weight = {0: 1 , 1:2})
+                                verbose=1,  class_weight = {0: 1 , 1:1.92})
 
 print("now onto 2nd part \n\n\n\n\n\n\n\n\n")
 
@@ -209,8 +209,8 @@ model.compile(
         metrics=[tf.keras.metrics.RecallAtPrecision(precision=0.9, name='recallAtPrecision'), 
         tf.keras.metrics.BinaryAccuracy(threshold=0.6, name='binaryAccuracy')])
 
-model.fit(x=dataset_train, validation_data=dataset_val, epochs=100, 
-                                verbose=1, callbacks = [cp_callback] ,class_weight = {0: 1 , 1:2})
+model.fit(x=dataset_train, validation_data=dataset_val, epochs=120, 
+                                verbose=1, callbacks = [cp_callback] ,class_weight = {0: 1 , 1:1.92})
 
 
 
