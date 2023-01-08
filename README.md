@@ -4,9 +4,13 @@
 
 ## 💡 Introduction
 
-Roads in medium-sized Indian towns often have lots of traffic but no (or disregarded) traffic stops. This makes it hard to cross the roads safely, because it involves predicting safe durations using one’s sight. In this project, we are training image based ML models to predict road crossing safety. 
+Roads in medium-sized Indian towns often have lots of traffic but no (or disregarded) traffic stops. This makes it hard for the blind to cross roads safely, because vision is crucial to determine when crossing is safe. Automatic and reliable image-based safety classifiers thus have the potential to help the blind to cross Indian roads. Yet, we currently lack datasets collected on Indian roads from the pedestrian point-of-view, labelled with road crossing safety information. Existing classifiers from other countries are often intended for crossroads, and hence rely on the detection and presence of traffic lights, which is not applicable in Indian conditions. We introduce INDRA (INdian Dataset for RoAd crossing), the first dataset capturing videos of Indian roads from the pedestrian point-of-view. INDRA contains 104 videos comprising of 26k 1080p frames, each annotated with a binary road crossing safety label and vehicle bounding boxes. We train various classifiers to predict road crossing safety on this data, ranging from SVMs to convolutional neural networks (CNNs). The best performing model DilatedRoadCrossNet is a novel single-image architecture tailored for deployment on the Nvidia Jetson Nano. It achieves 79% recall at 90% precision on unseen images. Lastly, we present a wearable road crossing assistant running DilatedRoadCrossNet, which can help the blind cross Indian roads in real-time.
 
 This repository includes Python implementation for various approaches we developed for the prediction model.
+
+⭐ Awarded Best Paper (Indian Context) at [ICVGIP 2022](https://events.iitgn.ac.in/2022/icvgip/). Find the arXiv pre-print [here](https://arxiv.org/abs/2211.07916).
+
+⭐ Awarded financial assistance under the Innovation track of the Govt. of Gujarat’s [Startups & Innovation Policy](http://www.ssipgujarat.in/new_student1.php).
 
 &nbsp;
 
@@ -14,7 +18,7 @@ This repository includes Python implementation for various approaches we develop
 
 Any suitable dataset did not exist (datasets for autonomous cars are not recorded from a pedestrian’s point of view), so we have created our own dataset. Our dataset contains 104 videos from diverse locations, time, traffic patterns, collected using an action camera from different roads of Anand, Gujarat.
 
-[Dataset Usage and Download Link ![Dataset-link](https://img.icons8.com/fluent-systems-filled/15/0366D6/external-link.png)](https://forms.gle/xtkZexnEuRVYfwAT6)
+[Dataset Usage and Download Link ![Dataset-link](https://img.icons8.com/fluent-systems-filled/15/0366D6/external-link.png)](https://www.kaggle.com/datasets/siddhi17/road-crossing-dataset)
 
 &nbsp;
 
